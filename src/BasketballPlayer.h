@@ -14,6 +14,12 @@ private:
   int assists;
 public:
     BasketballPlayer(string name, string college, int height, int yearBorn, int jerseyNum, int points, int draftYear, int rebounds, int assists, int gamesPlayed);
+    int getPoints() const;
+    string getCollege();
+    int getDraftYear() const;
+    int getRebounds() const;
+    int getAssists() const;
+    int getGamesPlayed() const;
 };
 
 
