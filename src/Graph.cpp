@@ -2,24 +2,26 @@
 
 #include "Graph.h"
 
-Graph::Graph(){
-    adjList = HashMap<HashMap<Connection>>(100000);
-}
+//TODO: Change this to undordered set by adding hash function for player
+#include <queue>
+#include <set>
+
+Graph::Graph()= default;
 
 bool Graph::addEdge(Player& p1, Player& p2, Connection c) {
     if(c == none) {
         return false;
     }
-    if(adjList.find(p1)) {
-        if(adjList[p1].find(p2)) {
+    if(adjList.find(p1)!=adjList.end()) {
+        if(adjList[p1].find(p2)!=adjList[p1].end()) {
             return false;
         }
-        adjList[p1].insert(p2,c);
+        adjList[p1][p2]=c;
     }
     else {
-        HashMap<Connection> edges;
-        adjList.insert(p1,edges);
-        adjList[p1].insert(p2,c);
+        map<Player,Connection> edges;
+        adjList[p1] = edges;
+        adjList[p1][p2] = c;
     }
     addEdge(p2,p1,c);
     return true;
@@ -119,12 +121,29 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
 }
 
 //TODO: write the bodies for these algorithms
-int Graph::shortestPathBFS(Player src, Player dest) {
-
-    return -1;
+vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Player& dest) {
+    queue<vector<pair<Player,Connection>>> q;
+    set<Player> visited;
+    q.push({pair<Player,Connection>(src,none)});
+    visited.insert(src);
+    while(!q.empty()) {
+        auto path = q.front();
+        q.pop();
+        if(path[path.size()-1].first == dest) {
+            return path;
+        }
+        for(pair<Player,Connection> couple : adjList[path[path.size()-1].first]) {
+            if(visited.find(couple.first) == visited.end()) {
+                vector<pair<Player,Connection>> newPath = vector<pair<Player,Connection>>(path);
+                newPath.push_back(couple);
+                q.push(newPath);
+                visited.insert(couple.first);
+            }
+        }
+    }
+    return {};
 }
 
-int Graph::shortestPathDFS(Player src, Player dest) {
+vector<pair<Player,Graph::Connection>> Graph::shortestPathDFS(Player& src, Player& dest) {
 
-    return -1;
 }
