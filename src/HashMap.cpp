@@ -119,3 +119,25 @@ void HashMap<T>::resize() {
     }
     map = newMap;
 }
+
+template<typename T>
+HashMap<T>& HashMap<T>::operator=(const HashMap &other) {
+    capacity = other.capacity;
+    size = other.size;
+    maxLF = other.maxLF;
+    for(int i = 0; i < capacity; i++) {
+        delete map[i];
+        map[i] = new PlayerList<T>();
+        map[i].head = other.map[i].head;
+        PlayerNode<T>* curr = map[i].head;
+        PlayerNode<T>* otherCurr = other.map[i].head;
+        while(otherCurr != nullptr) {
+            curr->next = new PlayerNode<T>();
+            curr->next->key = otherCurr->key;
+            curr->next->value = otherCurr->value;
+            otherCurr = otherCurr->next;
+            curr = curr->next;
+        }
+    }
+    return *this;
+}

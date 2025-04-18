@@ -41,6 +41,7 @@ public:
     void insert(Player& player, T& value);
     T& operator[](Player& player);
     bool find(Player& player);
+    HashMap& operator=(const HashMap& other);
 };
 
 
