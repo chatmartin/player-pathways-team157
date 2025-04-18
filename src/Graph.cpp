@@ -117,3 +117,14 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
     }
     return none;
 }
+
+//TODO: write the bodies for these algorithms
+int Graph::shortestPathBFS(Player src, Player dest) {
+
+    return -1;
+}
+
+int Graph::shortestPathDFS(Player src, Player dest) {
+
+    return -1;
+}
