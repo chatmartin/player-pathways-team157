@@ -2,6 +2,10 @@
 
 #include "Player.h"
 
+Player::Player() {
+    height=0,yearBorn=0,jerseyNum=-1;
+}
+
 Player::Player(string name, int height, int yearBorn, int jerseyNum) {
     this->name = name;
     this->height = height;

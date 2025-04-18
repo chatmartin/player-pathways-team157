@@ -5,6 +5,7 @@
 //TODO: Change this to undordered set by adding hash function for player
 #include <queue>
 #include <set>
+#include <stack>
 
 Graph::Graph()= default;
 
@@ -144,6 +145,35 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Playe
     return {};
 }
 
-vector<pair<Player,Graph::Connection>> Graph::shortestPathDFS(Player& src, Player& dest) {
-
+vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, Player& dest) {
+    map<Player,pair<int,pair<Player,Connection>>> distances;
+    for(auto p : adjList) {
+        distances[p.first] = pair<int,pair<Player,Connection>>(INT_MAX,pair<Player,Connection>(Player(),none));
+    }
+    distances[src].first = 0;
+    priority_queue<pair<int,Player>, vector<pair<int,Player>>, greater<pair<int,Player>>> pq;
+    pq.emplace(0,src);
+    while(!pq.empty()) {
+        auto dist = pq.top();
+        pq.pop();
+        if(dist.second == dest) {
+            break;
+        }
+        for(auto couple: adjList[dist.second]) {
+            if(distances[dist.second].first+1 < distances[couple.first].first) {
+                distances[couple.first].first = distances[dist.second].first+1;
+                distances[couple.first].second.first = dist.second;
+                distances[couple.first].second.second = couple.second;
+                pq.emplace(distances[couple.first].first,couple.first);
+            }
+        }
+    }
+    vector<pair<Player,Connection>> path;
+    pair<Player,Connection> node = distances[dest].second;
+    while(!(node.first == src)) {
+        path.insert(path.begin(),{node.first,node.second});
+        node = distances[node.first].second;
+    }
+    path.insert(path.begin(),{node.first,node.second});
+    return path;
 }

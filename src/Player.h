@@ -15,6 +15,7 @@ class Player {
     map<int,string> teamTime;
 public:
     Player(string name, int height, int yearBorn, int jerseyNum);
+    Player();
     string getName();
     int getHeight();
     int getYearBorn();

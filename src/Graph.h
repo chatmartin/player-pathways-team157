@@ -18,7 +18,7 @@ public:
     bool addEdge(Player& p1, Player& p2, Connection c);
     //TODO: Write the BFS and DFS algorithms for shortest path
     vector<pair<Player,Connection>> shortestPathBFS(Player& src, Player& dest);
-    vector<pair<Player,Connection>> shortestPathDFS(Player& src, Player& dest);
+    vector<pair<Player,Connection>> shortestPathDijkstra(Player& src, Player& dest);
 };
 
 
