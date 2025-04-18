@@ -121,7 +121,6 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
     return none;
 }
 
-//TODO: write the bodies for these algorithms
 vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Player& dest) {
     queue<vector<pair<Player,Connection>>> q;
     set<Player> visited;
@@ -146,11 +145,11 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Playe
 }
 
 vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, Player& dest) {
-    map<Player,pair<int,pair<Player,Connection>>> distances;
+    map<Player,pair<int,pair<Player,Connection>>> paths;
     for(auto p : adjList) {
-        distances[p.first] = pair<int,pair<Player,Connection>>(INT_MAX,pair<Player,Connection>(Player(),none));
+        paths[p.first] = pair<int,pair<Player,Connection>>(INT_MAX,pair<Player,Connection>(Player(),none));
     }
-    distances[src].first = 0;
+    paths[src].first = 0;
     priority_queue<pair<int,Player>, vector<pair<int,Player>>, greater<pair<int,Player>>> pq;
     pq.emplace(0,src);
     while(!pq.empty()) {
@@ -160,19 +159,22 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, 
             break;
         }
         for(auto couple: adjList[dist.second]) {
-            if(distances[dist.second].first+1 < distances[couple.first].first) {
-                distances[couple.first].first = distances[dist.second].first+1;
-                distances[couple.first].second.first = dist.second;
-                distances[couple.first].second.second = couple.second;
-                pq.emplace(distances[couple.first].first,couple.first);
+            if(paths[dist.second].first+1 < paths[couple.first].first) {
+                paths[couple.first].first = paths[dist.second].first+1;
+                paths[couple.first].second.first = dist.second;
+                paths[couple.first].second.second = couple.second;
+                pq.emplace(paths[couple.first].first,couple.first);
             }
         }
     }
+    if(paths[dest].first == INT_MAX) {
+        return {};
+    }
     vector<pair<Player,Connection>> path;
-    pair<Player,Connection> node = distances[dest].second;
+    pair<Player,Connection> node = paths[dest].second;
     while(!(node.first == src)) {
         path.insert(path.begin(),{node.first,node.second});
-        node = distances[node.first].second;
+        node = paths[node.first].second;
     }
     path.insert(path.begin(),{node.first,node.second});
     return path;
