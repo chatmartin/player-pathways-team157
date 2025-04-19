@@ -121,8 +121,8 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
 vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Player& dest) {
     queue<pair<Player,Connection>> q;
     unordered_map<Player,pair<Player,Connection>> prevs = unordered_map<Player,pair<Player,Connection>>(1000);
-    q.push({pair<Player,Connection>(src,none)});
-    prevs[src] = pair<Player,Connection>(src,none);
+    q.emplace(src,none);
+    prevs[src] = q.front();
     while(!q.empty()) {
         auto player = q.front();
         q.pop();
