@@ -13,7 +13,7 @@ private:
     string nationality;
     int maxGoals;
 public:
-    SoccerPlayer(string name, string nationality, int height, int yearBorn, int jerseyNum, int goals, int yellowCards, int redCards, int maxGoals);
+    SoccerPlayer(string name, string nationality, int height, int yearBorn, int goals, int yellowCards, int redCards, int maxGoals);
     int getGoals() const;
     int getYellowCards() const;
     int getRedCards() const;

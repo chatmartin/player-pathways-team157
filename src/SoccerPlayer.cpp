@@ -2,7 +2,7 @@
 
 #include "SoccerPlayer.h"
 
-SoccerPlayer::SoccerPlayer(string name, string nationality, int height, int yearBorn, int jerseyNum, int goals, int yellowCards, int redCards, int maxGoals) : Player(name,height,yearBorn,jerseyNum) {
+SoccerPlayer::SoccerPlayer(string name, string nationality, int height, int yearBorn, int goals, int yellowCards, int redCards, int maxGoals) : Player(name,height,yearBorn) {
     this->nationality = nationality;
     this->goals = goals;
     this->yellowCards = yellowCards;
