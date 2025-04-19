@@ -3,6 +3,7 @@
 #include "Graph.h"
 
 //TODO: Change this to undordered set by adding hash function for player
+#include <algorithm>
 #include <queue>
 #include <set>
 #include <stack>
@@ -73,7 +74,6 @@ Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
     return none;
 }
 
-
 Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& p2) {
     if(p1 == p2) return none;
     map<int,string> tt1 = p1.getTeamTime();
@@ -122,26 +122,35 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
 }
 
 vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Player& dest) {
-    queue<vector<pair<Player,Connection>>> q;
-    set<Player> visited;
+    queue<pair<Player,Connection>> q;
+    map<Player,pair<Player,Connection>> prevs;
     q.push({pair<Player,Connection>(src,none)});
-    visited.insert(src);
+    prevs[src] = pair<Player,Connection>(src,none);
     while(!q.empty()) {
-        auto path = q.front();
+        auto player = q.front();
         q.pop();
-        if(path[path.size()-1].first == dest) {
-            return path;
+        if(player.first == dest) {
+            break;
         }
-        for(pair<Player,Connection> couple : adjList[path[path.size()-1].first]) {
-            if(visited.find(couple.first) == visited.end()) {
-                vector<pair<Player,Connection>> newPath = vector<pair<Player,Connection>>(path);
-                newPath.push_back(couple);
-                q.push(newPath);
-                visited.insert(couple.first);
+        for(pair<Player,Connection> couple : adjList[player.first]) {
+            if(prevs.find(couple.first) == prevs.end()) {
+                q.push(couple);
+                prevs[couple.first] = player;
             }
         }
     }
-    return {};
+    if(prevs.find(dest)==prevs.end()) {
+        return {};
+    }
+    vector<pair<Player,Connection>> shortestPath;
+    pair<Player,Connection> node = prevs[dest];
+    while(!(node.first == src)) {
+        shortestPath.push_back(node);
+        node = prevs[node.first];
+    }
+    shortestPath.push_back(node);
+    reverse(shortestPath.begin(),shortestPath.end());
+    return shortestPath;
 }
 
 vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, Player& dest) {
@@ -170,12 +179,13 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, 
     if(paths[dest].first == INT_MAX) {
         return {};
     }
-    vector<pair<Player,Connection>> path;
+    vector<pair<Player,Connection>> shortestPath;
     pair<Player,Connection> node = paths[dest].second;
     while(!(node.first == src)) {
-        path.insert(path.begin(),{node.first,node.second});
+        shortestPath.push_back(node);
         node = paths[node.first].second;
     }
-    path.insert(path.begin(),{node.first,node.second});
-    return path;
+    shortestPath.push_back(node);
+    reverse(shortestPath.begin(),shortestPath.end());
+    return shortestPath;
 }
