@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.29)
+project(player_pathways_team157)
+
+set(CMAKE_CXX_STANDARD 14)
+
+add_executable(player_pathways_team157
+    src/main.cpp
+        src/Player.h
+        src/Player.cpp
+        src/SoccerPlayer.h
+        src/SoccerPlayer.cpp
+        src/BasketballPlayer.h
+        src/BasketballPlayer.cpp
+        src/Graph.h
+        src/Graph.cpp)

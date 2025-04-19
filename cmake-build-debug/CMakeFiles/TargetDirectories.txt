@@ -1,0 +1,3 @@
+C:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/CMakeFiles/player_pathways_team157.dir
+C:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/CMakeFiles/rebuild_cache.dir
