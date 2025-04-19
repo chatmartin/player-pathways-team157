@@ -2,9 +2,9 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include "HashMap.h"
 #include "SoccerPlayer.h"
 #include "BasketballPlayer.h"
+#include <vector>
 using namespace std;
 class Graph {
 private:
