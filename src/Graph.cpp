@@ -2,11 +2,8 @@
 
 #include "Graph.h"
 
-//TODO: Change this to undordered set by adding hash function for player
 #include <algorithm>
 #include <queue>
-#include <set>
-#include <stack>
 
 Graph::Graph()= default;
 
@@ -21,7 +18,7 @@ bool Graph::addEdge(Player& p1, Player& p2, Connection c) {
         adjList[p1][p2]=c;
     }
     else {
-        map<Player,Connection> edges;
+        unordered_map<Player,Connection> edges = unordered_map<Player,Connection>(100);
         adjList[p1] = edges;
         adjList[p1][p2] = c;
     }
@@ -32,10 +29,10 @@ bool Graph::addEdge(Player& p1, Player& p2, Connection c) {
 
 Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
     if(p1 == p2) return none;
-    map<int,string> tt1 = p1.getTeamTime();
-    map<int,string> tt2 = p2.getTeamTime();
-    map<int,string>::iterator it1 = tt1.begin();
-    map<int,string>::iterator it2 = tt2.begin();
+    unordered_map<int,string> tt1 = p1.getTeamTime();
+    unordered_map<int,string> tt2 = p2.getTeamTime();
+    unordered_map<int,string>::iterator it1 = tt1.begin();
+    unordered_map<int,string>::iterator it2 = tt2.begin();
     while(it1 != tt1.end() && it1->first < it2->first) {
         it1++;
     }
@@ -76,10 +73,10 @@ Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
 
 Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& p2) {
     if(p1 == p2) return none;
-    map<int,string> tt1 = p1.getTeamTime();
-    map<int,string> tt2 = p2.getTeamTime();
-    map<int,string>::iterator it1 = tt1.begin();
-    map<int,string>::iterator it2 = tt2.begin();
+    unordered_map<int,string> tt1 = p1.getTeamTime();
+    unordered_map<int,string> tt2 = p2.getTeamTime();
+    unordered_map<int,string>::iterator it1 = tt1.begin();
+    unordered_map<int,string>::iterator it2 = tt2.begin();
     while(it1 != tt1.end() && it1->first < it2->first) {
         it1++;
     }
@@ -123,7 +120,7 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
 
 vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Player& dest) {
     queue<pair<Player,Connection>> q;
-    map<Player,pair<Player,Connection>> prevs;
+    unordered_map<Player,pair<Player,Connection>> prevs = unordered_map<Player,pair<Player,Connection>>(1000);
     q.push({pair<Player,Connection>(src,none)});
     prevs[src] = pair<Player,Connection>(src,none);
     while(!q.empty()) {
@@ -154,7 +151,7 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Playe
 }
 
 vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, Player& dest) {
-    map<Player,pair<int,pair<Player,Connection>>> paths;
+    unordered_map<Player,pair<int,pair<Player,Connection>>> paths = unordered_map<Player,pair<int,pair<Player,Connection>>>(1000);
     for(auto p : adjList) {
         paths[p.first] = pair<int,pair<Player,Connection>>(INT_MAX,pair<Player,Connection>(Player(),none));
     }

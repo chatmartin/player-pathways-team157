@@ -3,7 +3,7 @@
 #define PLAYER_H
 
 #include <string>
-#include <map>
+#include <unordered_map>
 
 using namespace std;
 class Player {
@@ -11,16 +11,15 @@ class Player {
     int height;
     int yearBorn;
     int jerseyNum;
-    //TODO: Create a hashmap class for data structure 2
-    map<int,string> teamTime;
+    unordered_map<int,string> teamTime;
 public:
     Player(string name, int height, int yearBorn, int jerseyNum);
     Player();
-    string getName();
-    int getHeight();
-    int getYearBorn();
-    int getJerseyNum();
-    map<int,string> getTeamTime();
+    string getName() const;
+    int getHeight() const;
+    int getYearBorn() const;
+    int getJerseyNum() const;
+    unordered_map<int,string> getTeamTime();
     void addTeamTime(int year, string team);
     bool operator==(const Player& other);
     bool operator<(const Player& other) const;

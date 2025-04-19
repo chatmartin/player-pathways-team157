@@ -13,23 +13,23 @@ Player::Player(string name, int height, int yearBorn, int jerseyNum) {
     this->jerseyNum = jerseyNum;
 }
 
-string Player::getName() {
+string Player::getName() const {
     return this->name;
 }
 
-int Player::getHeight() {
+int Player::getHeight() const {
     return this->height;
 }
 
-int Player::getYearBorn() {
+int Player::getYearBorn() const {
     return this->yearBorn;
 }
 
-int Player::getJerseyNum() {
+int Player::getJerseyNum() const {
     return this->jerseyNum;
 }
 
-map<int, string> Player::getTeamTime() {
+unordered_map<int, string> Player::getTeamTime() {
     return teamTime;
 }
 
@@ -57,4 +57,18 @@ bool Player::operator<=(const Player &other) const {
 
 bool Player::operator>=(const Player &other) const {
     return this->yearBorn >= other.yearBorn;
+}
+
+namespace std {
+    template<>
+    struct hash<Player> {
+        size_t operator()(const Player &p) const {
+            string name = p.getName();
+            size_t hash = 0;
+            for(size_t i =0; i < name.length(); i++) {
+                hash += name[i]*(i+1);
+            }
+            return hash;
+        }
+    };
 }
