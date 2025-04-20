@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <queue>
+#include <unordered_set>
 
 Graph::Graph() : adjList(unordered_map<Player,unordered_map<Player,Connection>>(1000)) {}
 
@@ -53,9 +54,6 @@ Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
     if(p1.getNationality()==p2.getNationality()) {
         return nationality;
     }
-    if(p1.getRedCards() == p2.getRedCards()) {
-        return redCards;
-    }
     if(p1.getYellowCards() == p2.getYellowCards()) {
         return yellowCards;
     }
@@ -87,9 +85,9 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
         it1++;
         it2++;
     }
-    if(p1.getHeight() == p2.getHeight()) {
+    /*if(p1.getHeight() == p2.getHeight()) {
         return height;
-    }
+    }*/
     if(p1.getPoints() == p2.getPoints()) {
         return points;
     }
@@ -102,7 +100,7 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
     if(p1.getGamesPlayed() == p2.getGamesPlayed()) {
         return gamesPlayed;
     }
-    if(p1.getDraftYear()==p2.getDraftYear()) {
+    /*if(p1.getDraftYear()==p2.getDraftYear()) {
         return draftYear;
     }
     if(p1.getWeight() == p2.getWeight()) {
@@ -113,7 +111,7 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
     }
     if(p1.getCollege() == p2.getCollege() && p1.getCollege() != "None") {
         return college;
-    }
+    }*/
     return none;
 }
 
@@ -189,4 +187,22 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, 
     shortestPath.push_back(node);
     reverse(shortestPath.begin(),shortestPath.end());
     return shortestPath;
+}
+
+bool Graph::checkConnectivity(Player &src) {
+    unordered_set<Player> visited;
+    queue<Player> q;
+    q.push(src);
+    visited.insert(src);
+    while(!q.empty()) {
+        Player curr = q.front();
+        q.pop();
+        for(auto couple: adjList[curr]) {
+            if(visited.find(couple.first) == visited.end()) {
+                q.push(couple.first);
+                visited.insert(couple.first);
+            }
+        }
+    }
+    return visited.size()==adjList.size();
 }

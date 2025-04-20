@@ -5,6 +5,7 @@
 #include "Player.h"
 using namespace std;
 class BasketballPlayer:public Player {
+    //TODO: Get rid of unnecessary fields
 private:
     int points;
     string college;

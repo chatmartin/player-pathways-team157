@@ -4,7 +4,7 @@
 
 #include <string>
 #include <unordered_map>
-
+//TODO: Get rid of unnecessary fields
 using namespace std;
 class Player {
     string name;
