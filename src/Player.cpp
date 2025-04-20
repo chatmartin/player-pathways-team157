@@ -23,7 +23,7 @@ int Player::getYearBorn() const {
     return this->yearBorn;
 }
 
-unordered_map<int, string> Player::getTeamTime() {
+map<int, string> Player::getTeamTime() {
     return teamTime;
 }
 

@@ -1,7 +1,7 @@
 
 
 #include "Graph.h"
-
+#include <iostream>
 #include <algorithm>
 #include <queue>
 #include <unordered_set>
@@ -30,10 +30,10 @@ bool Graph::addEdge(Player& p1, Player& p2, Connection c) {
 
 Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
     if(p1 == p2) return none;
-    unordered_map<int,string> tt1 = p1.getTeamTime();
-    unordered_map<int,string> tt2 = p2.getTeamTime();
-    unordered_map<int,string>::iterator it1 = tt1.begin();
-    unordered_map<int,string>::iterator it2 = tt2.begin();
+    map<int,string> tt1 = p1.getTeamTime();
+    map<int,string> tt2 = p2.getTeamTime();
+    map<int,string>::iterator it1 = tt1.begin();
+    map<int,string>::iterator it2 = tt2.begin();
     while(it1 != tt1.end() && it1->first < it2->first) {
         it1++;
     }
@@ -41,11 +41,13 @@ Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
         it2++;
     }
     while(it1 != tt1.end() && it2 != tt2.end() && it1->first == it2->first) {
-        if(it1->second == it2->second) {
+        if(it1->second == it2->second && it1->second != "") {
             return teamTime;
         }
+        it1++;
+        it2++;
     }
-    if(p1.getHeight() == p2.getHeight()) {
+    if(p1.getHeight() == p2.getHeight() && p1.getHeight()!=-1) {
         return height;
     }
     if(p1.getGoals()==p2.getGoals()) {
@@ -57,10 +59,10 @@ Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
     if(p1.getYellowCards() == p2.getYellowCards()) {
         return yellowCards;
     }
-    if(p1.getMaxGoals()>=3 && p2.getMaxGoals()>=3) {
-        return maxGoals;
+    if(p1.getHatTrick() && p2.getHatTrick()) {
+        return hatTrick;
     }
-    if(p1.getYearBorn() == p2.getYearBorn()) {
+    if(p1.getYearBorn() == p2.getYearBorn() && p1.getYearBorn()!=-1) {
         return yearBorn;
     }
     return none;
@@ -68,10 +70,10 @@ Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
 
 Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& p2) {
     if(p1 == p2) return none;
-    unordered_map<int,string> tt1 = p1.getTeamTime();
-    unordered_map<int,string> tt2 = p2.getTeamTime();
-    unordered_map<int,string>::iterator it1 = tt1.begin();
-    unordered_map<int,string>::iterator it2 = tt2.begin();
+    map<int,string> tt1 = p1.getTeamTime();
+    map<int,string> tt2 = p2.getTeamTime();
+    map<int,string>::iterator it1 = tt1.begin();
+    map<int,string>::iterator it2 = tt2.begin();
     while(it1 != tt1.end() && it1->first < it2->first) {
         it1++;
     }
@@ -205,4 +207,8 @@ bool Graph::checkConnectivity(Player &src) {
         }
     }
     return visited.size()==adjList.size();
+}
+
+unordered_map<Player,unordered_map<Player,Graph::Connection>>& Graph::getAdjList() {
+    return adjList;
 }

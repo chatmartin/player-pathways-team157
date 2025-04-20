@@ -10,18 +10,23 @@ private:
     int goals;
     int yellowCards;
     string nationality;
-    int maxGoals;
+    bool hatTrick;
     int assists;
     int appearances;
 
 public:
-    SoccerPlayer(string name, string nationality, int height, int yearBorn, int goals, int yellowCards, int maxGoals, int assists, int appearances);
+    SoccerPlayer(string name, string nationality, int height, int yearBorn, int goals, int yellowCards, int assists, int appearances, bool hatTrick);
     int getGoals() const;
     int getYellowCards() const;
     string getNationality();
-    int getMaxGoals() const;
+    bool getHatTrick() const;
     int getAssists() const;
     int getAppearances() const;
+    void addGoals(int goals);
+    void addYellowCards(int yellowCards);
+    void addAppearance();
+    void addAssists(int assists);
+    void hasHatTrick();
 };
 
 
