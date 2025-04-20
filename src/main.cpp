@@ -4,19 +4,21 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
 using namespace std;
+
 int main(){
     vector<BasketballPlayer> bballers;
-    unordered_map<string,int> indHolder;
+    unordered_map<string,int> indHolderBBall;
     ifstream file("all_seasons.csv");
     string line;
     getline(file,line);
-    BasketballPlayer currPlayer;
+    BasketballPlayer currPlayerBBall;
     while(getline(file,line)) {
-        stringstream ss(line);
+        istringstream iss(line);
         string value;
         vector<string> tokens;
-        while(getline(ss,value,',')) {
+        while(getline(iss,value,',')) {
             tokens.push_back(value);
         }
         string name = tokens[0];
@@ -37,21 +39,22 @@ int main(){
         catch(...) {
             draftYear = year;
         }
-        if(!(currPlayer == name)) {
+        if(!(currPlayerBBall == name)) {
             BasketballPlayer baller = BasketballPlayer(name,college,height,year-age,points,draftYear,rebounds,assists,gamesPlayed,weight);
             baller.addTeamTime(year,team);
             bballers.push_back(baller);
-            indHolder[name] = bballers.size()-1;
-            currPlayer = baller;
+            indHolderBBall[name] = bballers.size()-1;
+            currPlayerBBall = baller;
         }
         else {
-            bballers[indHolder[name]].addTeamTime(year,team);
-            bballers[indHolder[name]].addAssists(assists);
-            bballers[indHolder[name]].addGamesPlayed(gamesPlayed);
-            bballers[indHolder[name]].addRebounds(rebounds);
-            bballers[indHolder[name]].addPoints(points);
+            bballers[indHolderBBall[name]].addTeamTime(year,team);
+            bballers[indHolderBBall[name]].addAssists(assists);
+            bballers[indHolderBBall[name]].addGamesPlayed(gamesPlayed);
+            bballers[indHolderBBall[name]].addRebounds(rebounds);
+            bballers[indHolderBBall[name]].addPoints(points);
         }
     }
+    file.close();
     Graph bballGraph = Graph();
     cout << bballers.size() << endl;
     for(int i = 0;i < bballers.size(); i++) {
@@ -59,4 +62,34 @@ int main(){
             bballGraph.addEdge(bballers[i],bballers[j],bballGraph.findConnection(bballers[i],bballers[j]));
         }
     }
+
+    vector<BasketballPlayer> fballers;
+    unordered_map<string,int> indHolderFBall;
+    unordered_map<int,string> playerID;
+    unordered_map<int,string> clubID;
+    file.open("clubs.csv");
+    getline(file,line);
+    while(getline(file,line)) {
+        istringstream iss(line);
+        string value;
+        vector<string> tokens;
+        while(getline(iss,value,',')) {
+            tokens.push_back(value);
+        }
+        clubID[stoi(tokens[0])] = tokens[2];
+    }
+    file.close();
+    file.open("fballer.csv");
+    getline(file,line);
+    while(getline(file,line)) {
+        istringstream iss(line);
+        string value;
+        vector<string> tokens;
+        while(getline(iss,value,',')) {
+            tokens.push_back(value);
+        }
+        playerID[stoi(tokens[0])] = tokens[3];
+    }
+    file.close();
+    //TODO: Write the code for gathering all the data into SoccerPlayers
 }
