@@ -1,26 +1,14 @@
 
 #include "Player.h"
 
-Player::Player() {
-    height=0,yearBorn=0;
-}
+Player::Player() = default;
 
-Player::Player(string name, int height, int yearBorn) {
+Player::Player(string name) {
     this->name = name;
-    this->height = height;
-    this->yearBorn = yearBorn;
 }
 
 string Player::getName() const {
     return this->name;
-}
-
-int Player::getHeight() const {
-    return this->height;
-}
-
-int Player::getYearBorn() const {
-    return this->yearBorn;
 }
 
 map<int, string> Player::getTeamTime() {
@@ -37,22 +25,26 @@ bool Player::operator==(const Player &other) const {
     return this->name == other.name;
 }
 
+bool Player::operator!=(const Player &other) const {
+    return this->name != other.name;
+}
+
 bool Player::operator==(const string &other) const {
     return this->name == other;
 }
 
 bool Player::operator<(const Player &other) const {
-    return this->yearBorn < other.yearBorn;
+    return this->name < other.name;
 }
 
 bool Player::operator>(const Player &other) const {
-    return this->yearBorn > other.yearBorn;
+    return this->name > other.name;
 }
 
 bool Player::operator<=(const Player &other) const {
-    return this->yearBorn <= other.yearBorn;
+    return this->name <= other.name;
 }
 
 bool Player::operator>=(const Player &other) const {
-    return this->yearBorn >= other.yearBorn;
+    return this->name >= other.name;
 }

@@ -5,22 +5,20 @@
 #include <string>
 #include <unordered_map>
 #include <map>
-//TODO: Get rid of unnecessary fields
+
 using namespace std;
+
 class Player {
     string name;
-    int height;
-    int yearBorn;
     map<int,string> teamTime;
 public:
-    Player(string name, int height, int yearBorn);
+    Player(string name);
     Player();
     string getName() const;
-    int getHeight() const;
-    int getYearBorn() const;
     map<int,string> getTeamTime();
     void addTeamTime(int year, string team);
     bool operator==(const Player& other) const;
+    bool operator!=(const Player& other) const;
     bool operator==(const string& other) const;
     bool operator<(const Player& other) const;
     bool operator>(const Player& other) const;

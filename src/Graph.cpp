@@ -35,20 +35,17 @@ Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
     map<int,string>::iterator it1 = tt1.begin();
     map<int,string>::iterator it2 = tt2.begin();
     while(it1 != tt1.end() && it1->first < it2->first) {
-        it1++;
+        ++it1;
     }
     while(it2 != tt2.end() && it2->first < it1->first) {
-        it2++;
+        ++it2;
     }
     while(it1 != tt1.end() && it2 != tt2.end() && it1->first == it2->first) {
         if(it1->second == it2->second && it1->second != "") {
             return teamTime;
         }
-        it1++;
-        it2++;
-    }
-    if(p1.getHeight() == p2.getHeight() && p1.getHeight()!=-1) {
-        return height;
+        ++it1;
+        ++it2;
     }
     if(p1.getGoals()==p2.getGoals()) {
         return goals;
@@ -58,12 +55,6 @@ Graph::Connection Graph::findConnection(SoccerPlayer& p1, SoccerPlayer& p2) {
     }
     if(p1.getYellowCards() == p2.getYellowCards()) {
         return yellowCards;
-    }
-    if(p1.getHatTrick() && p2.getHatTrick()) {
-        return hatTrick;
-    }
-    if(p1.getYearBorn() == p2.getYearBorn() && p1.getYearBorn()!=-1) {
-        return yearBorn;
     }
     return none;
 }
@@ -75,21 +66,18 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
     map<int,string>::iterator it1 = tt1.begin();
     map<int,string>::iterator it2 = tt2.begin();
     while(it1 != tt1.end() && it1->first < it2->first) {
-        it1++;
+        ++it1;
     }
     while(it1 != tt1.end() && it2 != tt2.end() && it2->first < it1->first) {
-        it2++;
+        ++it2;
     }
     while(it1 != tt1.end() && it2 != tt2.end() && it1->first == it2->first) {
         if(it1->second == it2->second) {
             return teamTime;
         }
-        it1++;
-        it2++;
+        ++it1;
+        ++it2;
     }
-    /*if(p1.getHeight() == p2.getHeight()) {
-        return height;
-    }*/
     if(p1.getPoints() == p2.getPoints()) {
         return points;
     }
@@ -102,18 +90,6 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
     if(p1.getGamesPlayed() == p2.getGamesPlayed()) {
         return gamesPlayed;
     }
-    /*if(p1.getDraftYear()==p2.getDraftYear()) {
-        return draftYear;
-    }
-    if(p1.getWeight() == p2.getWeight()) {
-        return weight;
-    }
-    if(p1.getYearBorn() == p2.getYearBorn()) {
-        return yearBorn;
-    }
-    if(p1.getCollege() == p2.getCollege() && p1.getCollege() != "None") {
-        return college;
-    }*/
     return none;
 }
 
@@ -143,7 +119,7 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Playe
     vector<pair<Player,Connection>> shortestPath;
     shortestPath.emplace_back(dest,last);
     pair<Player,Connection> node = prevs[dest];
-    while(!(node.first == src)) {
+    while(node.first != src) {
         shortestPath.push_back(node);
         node = prevs[node.first];
     }
@@ -182,7 +158,7 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, 
     vector<pair<Player,Connection>> shortestPath;
     shortestPath.emplace_back(dest,last);
     pair<Player,Connection> node = paths[dest].second;
-    while(!(node.first == src)) {
+    while(node.first != src) {
         shortestPath.push_back(node);
         node = paths[node.first].second;
     }
@@ -191,7 +167,7 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, 
     return shortestPath;
 }
 
-bool Graph::checkConnectivity(Player &src) {
+vector<Player> Graph::checkConnectivity(const Player &src) {
     unordered_set<Player> visited;
     queue<Player> q;
     q.push(src);
@@ -206,7 +182,13 @@ bool Graph::checkConnectivity(Player &src) {
             }
         }
     }
-    return visited.size()==adjList.size();
+    vector<Player> v;
+    for(auto p: adjList) {
+        if(visited.find(p.first)==visited.end()) {
+            v.push_back(p.first);
+        }
+    }
+    return v;
 }
 
 unordered_map<Player,unordered_map<Player,Graph::Connection>>& Graph::getAdjList() {
