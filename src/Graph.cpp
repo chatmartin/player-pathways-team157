@@ -111,7 +111,7 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
     if(p1.getYearBorn() == p2.getYearBorn()) {
         return yearBorn;
     }
-    if(p1.getCollege() == p2.getCollege()) {
+    if(p1.getCollege() == p2.getCollege() && p1.getCollege() != "None") {
         return college;
     }
     return none;
@@ -165,7 +165,6 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, 
         auto dist = pq.top();
         pq.pop();
         if(dist.second == dest) {
-            last = paths[dist.second].second.second;
             break;
         }
         for(auto couple: adjList[dist.second]) {

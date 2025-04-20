@@ -9,7 +9,6 @@ int main(){
     vector<BasketballPlayer> bballers;
     ifstream file("all_seasons.csv");
     string line;
-    int count = 0;
     getline(file,line);
     BasketballPlayer currPlayer;
     while(getline(file,line)) {
@@ -25,7 +24,13 @@ int main(){
         int height = stoi(tokens[3]);
         int weight = stoi(tokens[4]);
         string college = tokens[5];
-        int gamesPlayed = stoi(tokens[10]);
+        int gamesPlayed;
+        try {
+            gamesPlayed = stoi(tokens[10]);
+        }
+        catch(...) {
+            cout  << "Error";
+        }
         int points = stof(tokens[11])*gamesPlayed;
         int rebounds = stof(tokens[12])*gamesPlayed;
         int assists = stof(tokens[13])*gamesPlayed;
@@ -50,10 +55,6 @@ int main(){
             currPlayer.addRebounds(rebounds);
             currPlayer.addPoints(points);
         }
-        if(count > 1000) {
-            break;
-        }
-        count++;
     }
     Graph bballGraph = Graph();
     cout << bballers.size() << endl;
@@ -62,7 +63,14 @@ int main(){
             bballGraph.addEdge(bballers[i],bballers[j],bballGraph.findConnection(bballers[i],bballers[j]));
         }
     }
+    cout << "complete" << endl;
     vector<pair<Player,Graph::Connection>> v = bballGraph.shortestPathBFS(bballers[5],bballers[10]);
+    cout << v.size() << endl;
+    for(int i = 0; i < v.size(); i++) {
+        cout << v[i].first.getName() << " " << v[i].second << endl;
+    }
+    cout << endl;
+    v = bballGraph.shortestPathDijkstra(bballers[5],bballers[10]);
     cout << v.size() << endl;
     for(int i = 0; i < v.size(); i++) {
         cout << v[i].first.getName() << " " << v[i].second << endl;
