@@ -93,7 +93,7 @@ Graph::Connection Graph::findConnection(BasketballPlayer& p1, BasketballPlayer& 
     return none;
 }
 
-vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Player& dest) {
+vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(const Player& src, const Player& dest) {
     queue<pair<Player,Connection>> q; //queue necessary for BFS
     unordered_map<Player,pair<Player,Connection>> prevs = unordered_map<Player,pair<Player,Connection>>(1000); //contains previous nodes, used for finding the overall path
     q.emplace(src,none);
@@ -128,7 +128,7 @@ vector<pair<Player,Graph::Connection>> Graph::shortestPathBFS(Player& src, Playe
     return shortestPath;
 }
 
-vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(Player& src, Player& dest) {
+vector<pair<Player,Graph::Connection>> Graph::shortestPathDijkstra(const Player& src, const Player& dest) {
     unordered_map<Player,pair<int,pair<Player,Connection>>> paths = unordered_map<Player,pair<int,pair<Player,Connection>>>(1000); //key is a player, for every player the important values are an int (d[v]), a player (p[v]) and the connection between this node and p[v]
     for(auto p : adjList) {
         paths[p.first] = pair<int,pair<Player,Connection>>(INT_MAX,pair<Player,Connection>(Player(),none)); //initializing every path as INT_MAX to allow for eventual relaxing
@@ -193,4 +193,18 @@ vector<Player> Graph::checkConnectivity(const Player &src) {
 
 unordered_map<Player,unordered_map<Player,Graph::Connection>>& Graph::getAdjList() {
     return adjList;
+}
+
+json Graph::toJson() {
+    json j;
+    for(auto p: adjList) {
+        for(auto couple: p.second) {
+            j["edges"].push_back({
+                {"source", p.first.getName()},
+                {"adjacent",couple.first.getName()},
+                {"connection",couple.second}
+            });
+        }
+    }
+    return j;
 }

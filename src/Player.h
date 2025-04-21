@@ -15,7 +15,7 @@ public:
     Player(string name);
     Player();
     string getName() const;
-    map<int,string> getTeamTime();
+    map<int,string> getTeamTime() const;
     void addTeamTime(int year, string team);
     bool operator==(const Player& other) const;
     bool operator!=(const Player& other) const;
@@ -24,6 +24,7 @@ public:
     bool operator>(const Player& other) const;
     bool operator<=(const Player& other) const;
     bool operator>=(const Player& other) const;
+    virtual ~Player();
 };
 //hash for player so it can be used in unordered maps and sets, which are more efficient
 namespace std {

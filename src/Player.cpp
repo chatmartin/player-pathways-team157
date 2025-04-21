@@ -11,7 +11,7 @@ string Player::getName() const {
     return this->name;
 }
 
-map<int, string> Player::getTeamTime() {
+map<int, string> Player::getTeamTime() const {
     return teamTime;
 }
 
@@ -48,3 +48,5 @@ bool Player::operator<=(const Player &other) const {
 bool Player::operator>=(const Player &other) const {
     return this->name >= other.name;
 }
+
+Player::~Player()=default;

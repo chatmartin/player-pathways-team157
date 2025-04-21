@@ -11,6 +11,49 @@
 
 using namespace std;
 
+//TODO: Change this, this is just a placeholder
+struct CORSHandler {
+    struct context {};
+
+    void before_handle(crow::request& req, crow::response& res, context&) {
+        res.add_header("Access-Control-Allow-Origin", "*");
+        res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        res.add_header("Access-Control-Allow-Headers", "Content-Type");
+        if (req.method == "OPTIONS"_method) {
+            res.code = 204;
+            res.end();
+        }
+    }
+
+    void after_handle(crow::request& req, crow::response& res, context&) {
+        res.add_header("Access-Control-Allow-Origin", "*");
+    }
+};
+
+//converts basketball players to json to be used in the frontend
+void to_json(json& j, const BasketballPlayer& bballer) {
+    j = json{
+        {"name",bballer.getName()},
+        {"points",bballer.getPoints()},
+        {"rebounds",bballer.getRebounds()},
+        {"assists",bballer.getAssists()},
+        {"games",bballer.getGamesPlayed()},
+        {"teamTime",bballer.getTeamTime()}
+    };
+}
+
+//converts soccer players to json to be used in the frontend
+void to_json(json& j, const SoccerPlayer& fballer) {
+    j = json{
+        {"name",fballer.getName()},
+        {"goals",fballer.getGoals()},
+        {"yellow",fballer.getYellowCards()},
+        {"assists",fballer.getAssists()},
+        {"games",fballer.getAppearances()},
+        {"teamTime",fballer.getTeamTime()}
+    };
+}
+
 void createBBallGraph(vector<BasketballPlayer>& bballers,unordered_map<string,int>& indHolderBBall,Graph& bballGraph) {
     //taking in data from the basketball dataset
     ifstream file("all_seasons.csv");
@@ -127,7 +170,6 @@ void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& 
         yellowBucket[fballer.getYellowCards()].push_back(fballer);
         appearBucket[fballer.getAppearances()].push_back(fballer);
     }
-    cout << "done" << endl;
 
     //add edges between soccer players using buckets to avoid having to do an O(|V|^2) brute force approach
     for(auto p: teamBucket) {
@@ -180,7 +222,6 @@ void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& 
             }
         }
     }
-    cout << "done" << endl;
     //get rid of any vertices with no connection in fballers
     for(int i = 0; i < fballers.size(); i++) {
         if(fballGraph.getAdjList().find(fballers[i])==fballGraph.getAdjList().end()) {
@@ -192,7 +233,6 @@ void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& 
     //get rid of duplicates in fballers
     sort(fballers.begin(), fballers.end());
     fballers.erase(unique(fballers.begin(), fballers.end()), fballers.end());
-    cout << "done" << endl;
     //make sure the graph is fully connected
     vector<Player> nonConnected = fballGraph.checkConnectivity(fballers[0]);
     for(int i = 0; i < nonConnected.size(); i++) {
@@ -204,7 +244,6 @@ void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& 
     for(int i = 0; i < fballers.size(); i++) {
         indHolderFBall[fballers[i].getName()] = i;
     }
-    cout << "done" << endl;
 }
 
 int main(){
@@ -218,7 +257,6 @@ int main(){
     //create the basketball graph
     Graph bballGraph;
     createBBallGraph(bballers,indHolderBBall,bballGraph);
-    cout << "done" << endl;
 
     //vector holding all soccer players in the map, important so the user knows what options they have and helps with dealing with input
     vector<SoccerPlayer> fballers;
@@ -227,6 +265,104 @@ int main(){
     //create the soccer graph
     Graph fballGraph;
     createFBallGraph(fballers,indHolderFBall,fballGraph);
-    cout << "done" << endl;
-    auto sui = fballers[indHolderFBall["Cristiano Ronaldo"]].getTeamTime();
+
+    using json = nlohmann::json;
+    crow::App<CORSHandler> app;
+
+    CROW_ROUTE(app, "/bball_graph")
+    .methods("GET"_method)([&bballGraph,&bballers]() {
+        json j;
+        j["graph"] = bballGraph.toJson();
+        j["players"] = bballers;
+        return crow::response{j.dump()};
+    });
+
+    CROW_ROUTE(app,"/fball_graph")
+    .methods("GET"_method)([&fballGraph,&fballers]() {
+        json j;
+        j["graph"] = fballGraph.toJson();
+        j["players"] = fballers;
+        return crow::response{j.dump()};
+    });
+
+    CROW_ROUTE(app, "/bballAlgo")
+    .methods("POST"_method)([&bballGraph,bballers,indHolderBBall](const crow::request& req) {
+        auto body = json::parse(req.body);
+        string from = body["from"];
+        string to = body["to"];
+        const Player& src = bballers[indHolderBBall.at(from)];
+        const Player& dest = bballers[indHolderBBall.at(to)];
+        auto bfsPath = bballGraph.shortestPathBFS(src,dest);
+        auto dijkPath = bballGraph.shortestPathDijkstra(src,dest);
+        vector<pair<BasketballPlayer,string>> trueBfsPath;
+        for(int i = 0; i < bfsPath.size()-1; i++) {
+            BasketballPlayer b = (bballers[indHolderBBall.at(bfsPath[i].first.getName())]);
+            Graph::Connection c = bfsPath[i+1].second;
+            string reason;
+            if(c == 1) {
+                auto tt = (bballers[indHolderBBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
+                for(auto p: b.getTeamTime) {
+                    if(tt.find(p.first) != tt.end()) {
+                        if(tt[p.first] == p.second) {
+                            reason = "was in the team " + p.second + " in the year " + to_string(p.first) + " with";
+                            break;
+                        }
+                    }
+                }
+            }
+            else if(c == 5) {
+                reason = "got " + to_string(b.getPoints()) + " points like";
+            }
+            else if(c == 6) {
+                reason = "got " + to_string(b.getRebounds()) + " rebounds like";
+            }
+            else if(c == 7) {
+                reason = "played " + to_string(b.getGamesPlayed()) + " games like";
+            }
+            else if(c == 8) {
+                reason = "got " + to_string(b.getAssists()) + " assists like";
+            }
+            trueBfsPath.emplace_back(b,reason);
+        }
+        trueBfsPath.emplace_back(bballers[indHolderBBall.at(bfsPath[bfsPath.size()-1].first.getName())],"");
+        vector<pair<BasketballPlayer,string>> trueDijkPath;
+        for(int i = 0; i < dijkPath.size()-1; i++) {
+            BasketballPlayer b = (bballers[indHolderBBall.at(dijkPath[i].first.getName())]);
+            Graph::Connection c = dijkPath[i].second;
+            string reason;
+            if(c == 1) {
+                auto tt = (bballers[indHolderBBall.at(dijkPath[i+1].first.getName())]).getTeamTime();
+                for(auto p: b.getTeamTime) {
+                    if(tt.find(p.first) != tt.end()) {
+                        if(tt[p.first] == p.second) {
+                            reason = "was in the team " + p.second + " in the year " + to_string(p.first) + " with";
+                            break;
+                        }
+                    }
+                }
+            }
+            else if(c == 5) {
+                reason = "got " + to_string(b.getPoints()) + " points like";
+            }
+            else if(c == 6) {
+                reason = "got " + to_string(b.getRebounds()) + " rebounds like";
+            }
+            else if(c == 7) {
+                reason = "played " + to_string(b.getGamesPlayed()) + " games like";
+            }
+            else if(c == 8) {
+                reason = "got " + to_string(b.getAssists()) + " assists like";
+            }
+            trueDijkPath.emplace_back(b,reason);
+        }
+        trueDijkPath.emplace_back(bballers[indHolderBBall.at(dijkPath[dijkPath.size()-1].first.getName())],"");
+        json j;
+        j["bfsPath"] = trueBfsPath;
+        j["dijkPath"] = trueDijkPath;
+        return crow::response{j.dump()};
+    });
+
+    //TODO: Do the same thing but for Soccer Players
+
+    app.port(18080).multithreaded().run();
 }
