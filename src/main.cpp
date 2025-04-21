@@ -286,7 +286,7 @@ int main(){
     });
 
     CROW_ROUTE(app, "/bballAlgo")
-    .methods("POST"_method)([&bballGraph,bballers,indHolderBBall](const crow::request& req) {
+    .methods("POST"_method)([&bballGraph,&bballers,&indHolderBBall](const crow::request& req) {
         auto body = json::parse(req.body);
         string from = body["from"];
         string to = body["to"];
@@ -362,7 +362,82 @@ int main(){
         return crow::response{j.dump()};
     });
 
-    //TODO: Do the same thing but for Soccer Players
+    CROW_ROUTE(app, "/fballAlgo")
+    .methods("POST"_method)([&fballGraph,&fballers,&indHolderFBall](const crow::request& req) {
+        auto body = json::parse(req.body);
+        string from = body["from"];
+        string to = body["to"];
+        const Player& src = fballers[indHolderFBall.at(from)];
+        const Player& dest = fballers[indHolderFBall.at(to)];
+        auto bfsPath = fballGraph.shortestPathBFS(src,dest);
+        auto dijkPath = fballGraph.shortestPathDijkstra(src,dest);
+        vector<pair<SoccerPlayer,string>> trueBfsPath;
+        for(int i = 0; i < bfsPath.size()-1; i++) {
+            SoccerPlayer f = (fballers[indHolderFBall.at(bfsPath[i].first.getName())]);
+            Graph::Connection c = bfsPath[i+1].second;
+            string reason;
+            if(c == 1) {
+                auto tt = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
+                for(auto p: f.getTeamTime) {
+                    if(tt.find(p.first) != tt.end()) {
+                        if(tt[p.first] == p.second) {
+                            reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
+                            break;
+                        }
+                    }
+                }
+            }
+            else if(c == 2) {
+                reason = " got " + to_string(f.getGoals()) + " goals like ";
+            }
+            else if(c == 3) {
+                reason = " got " + to_string(f.getYellowCards()) + " yellow cards like ";
+            }
+            else if(c == 7) {
+                reason = "played " + to_string(f.getAppearances()) + " games like";
+            }
+            else if(c == 8) {
+                reason = " got " + to_string(f.getAssists()) + " assists like ";
+            }
+            trueBfsPath.emplace_back(f,reason);
+        }
+        trueBfsPath.emplace_back(fballers[indHolderFBall.at(bfsPath[bfsPath.size()-1].first.getName())],"");
+        vector<pair<SoccerPlayer,string>> trueDijkPath;
+        for(int i = 0; i < dijkPath.size()-1; i++) {
+            SoccerPlayer f = (fballers[indHolderFBall.at(dijkPath[i].first.getName())]);
+            Graph::Connection c = dijkPath[i].second;
+            string reason;
+            if(c == 1) {
+                auto tt = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
+                for(auto p: f.getTeamTime) {
+                    if(tt.find(p.first) != tt.end()) {
+                        if(tt[p.first] == p.second) {
+                            reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
+                            break;
+                        }
+                    }
+                }
+            }
+            else if(c == 2) {
+                reason = " got " + to_string(f.getGoals()) + " goals like ";
+            }
+            else if(c == 3) {
+                reason = " got " + to_string(f.getYellowCards()) + " yellow cards like ";
+            }
+            else if(c == 7) {
+                reason = "played " + to_string(f.getAppearances()) + " games like";
+            }
+            else if(c == 8) {
+                reason = " got " + to_string(f.getAssists()) + " assists like ";
+            }
+            trueDijkPath.emplace_back(f,reason);
+        }
+        trueDijkPath.emplace_back(fballers[indHolderFBall.at(dijkPath[dijkPath.size()-1].first.getName())],"");
+        json j;
+        j["bfsPath"] = trueBfsPath;
+        j["dijkPath"] = trueDijkPath;
+        return crow::response{j.dump()};
+    });
 
     app.port(18080).multithreaded().run();
 }
