@@ -52,35 +52,35 @@ build cmake_object_order_depends_target_player_pathways_team157: phony || .
 build CMakeFiles/player_pathways_team157.dir/src/main.cpp.obj: CXX_COMPILER__player_pathways_team157_unscanned_Debug C$:/Users/amart/CLionProjects/player-pathways-team157/src/main.cpp || cmake_object_order_depends_target_player_pathways_team157
   DEP_FILE = CMakeFiles\player_pathways_team157.dir\src\main.cpp.obj.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-master/asio/include
+  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-asio-1-18-2/asio/include
   OBJECT_DIR = CMakeFiles\player_pathways_team157.dir
   OBJECT_FILE_DIR = CMakeFiles\player_pathways_team157.dir\src
 
 build CMakeFiles/player_pathways_team157.dir/src/Player.cpp.obj: CXX_COMPILER__player_pathways_team157_unscanned_Debug C$:/Users/amart/CLionProjects/player-pathways-team157/src/Player.cpp || cmake_object_order_depends_target_player_pathways_team157
   DEP_FILE = CMakeFiles\player_pathways_team157.dir\src\Player.cpp.obj.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-master/asio/include
+  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-asio-1-18-2/asio/include
   OBJECT_DIR = CMakeFiles\player_pathways_team157.dir
   OBJECT_FILE_DIR = CMakeFiles\player_pathways_team157.dir\src
 
 build CMakeFiles/player_pathways_team157.dir/src/SoccerPlayer.cpp.obj: CXX_COMPILER__player_pathways_team157_unscanned_Debug C$:/Users/amart/CLionProjects/player-pathways-team157/src/SoccerPlayer.cpp || cmake_object_order_depends_target_player_pathways_team157
   DEP_FILE = CMakeFiles\player_pathways_team157.dir\src\SoccerPlayer.cpp.obj.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-master/asio/include
+  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-asio-1-18-2/asio/include
   OBJECT_DIR = CMakeFiles\player_pathways_team157.dir
   OBJECT_FILE_DIR = CMakeFiles\player_pathways_team157.dir\src
 
 build CMakeFiles/player_pathways_team157.dir/src/BasketballPlayer.cpp.obj: CXX_COMPILER__player_pathways_team157_unscanned_Debug C$:/Users/amart/CLionProjects/player-pathways-team157/src/BasketballPlayer.cpp || cmake_object_order_depends_target_player_pathways_team157
   DEP_FILE = CMakeFiles\player_pathways_team157.dir\src\BasketballPlayer.cpp.obj.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-master/asio/include
+  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-asio-1-18-2/asio/include
   OBJECT_DIR = CMakeFiles\player_pathways_team157.dir
   OBJECT_FILE_DIR = CMakeFiles\player_pathways_team157.dir\src
 
 build CMakeFiles/player_pathways_team157.dir/src/Graph.cpp.obj: CXX_COMPILER__player_pathways_team157_unscanned_Debug C$:/Users/amart/CLionProjects/player-pathways-team157/src/Graph.cpp || cmake_object_order_depends_target_player_pathways_team157
   DEP_FILE = CMakeFiles\player_pathways_team157.dir\src\Graph.cpp.obj.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-master/asio/include
+  INCLUDES = -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/Crow-1.2.0-Darwin/include -IC:/Users/amart/CLionProjects/player-pathways-team157/cmake-build-debug/asio-asio-1-18-2/asio/include
   OBJECT_DIR = CMakeFiles\player_pathways_team157.dir
   OBJECT_FILE_DIR = CMakeFiles\player_pathways_team157.dir\src
 
@@ -94,7 +94,7 @@ build CMakeFiles/player_pathways_team157.dir/src/Graph.cpp.obj: CXX_COMPILER__pl
 
 build player_pathways_team157.exe: CXX_EXECUTABLE_LINKER__player_pathways_team157_Debug CMakeFiles/player_pathways_team157.dir/src/main.cpp.obj CMakeFiles/player_pathways_team157.dir/src/Player.cpp.obj CMakeFiles/player_pathways_team157.dir/src/SoccerPlayer.cpp.obj CMakeFiles/player_pathways_team157.dir/src/BasketballPlayer.cpp.obj CMakeFiles/player_pathways_team157.dir/src/Graph.cpp.obj
   FLAGS = -g
-  LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = -lws2_32  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\player_pathways_team157.dir
   POST_BUILD = cd .
   PRE_LINK = cd .

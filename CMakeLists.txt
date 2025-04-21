@@ -16,4 +16,6 @@ add_executable(player_pathways_team157
 
 include_directories("cmake-build-debug/Crow-1.2.0-Darwin/include")
 
-include_directories("cmake-build-debug/asio-master/asio/include")
+include_directories("cmake-build-debug/asio-asio-1-18-2/asio/include")
+
+target_link_libraries(player_pathways_team157 PRIVATE ws2_32)
