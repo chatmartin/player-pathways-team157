@@ -1,23 +1,17 @@
 
-
 #include <algorithm>
-
 #include "Graph.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <unordered_set>
 #include <windows.h>
+#define ASIO_STANDALONE
+#include "crow.h"
 
 using namespace std;
 
-int main(){
-    //important for maintaining utf-8 in output
-    SetConsoleOutputCP(CP_UTF8);
-    //vector holding every basketball player, important for the user to know their options and helps with input
-    vector<BasketballPlayer> bballers;
-    //holds the index of each player in bballers, which is important for knowing where a player is stored in bballers, making access easy
-    unordered_map<string,int> indHolderBBall;
+Graph createBBallGraph(vector<BasketballPlayer>& bballers,unordered_map<string,int>& indHolderBBall) {
     //taking in data from the basketball dataset
     ifstream file("all_seasons.csv");
     string line;
@@ -61,11 +55,11 @@ int main(){
             bballGraph.addEdge(bballers[i],bballers[j],Graph::findConnection(bballers[i],bballers[j]));
         }
     }
+    return bballGraph;
+}
 
-    //vector holding all soccer players in the map, important so the user knows what options they have and helps with dealing with input
-    vector<SoccerPlayer> fballers;
-    //holds the index of each player in fballers, which is important for knowing where a player is stored in fballers, making access easy
-    unordered_map<string,int> indHolderFBall;
+Graph createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& indHolderFBall) {
+    string line;
     //id holders which are important for reading data
     unordered_map<int,string> playerID;
     unordered_map<int,string> clubID;
@@ -211,4 +205,22 @@ int main(){
     for(int i = 0; i < fballers.size(); i++) {
         indHolderFBall[fballers[i].getName()] = i;
     }
+    return fballGraph;
+}
+
+int main(){
+    //important for maintaining utf-8 in output
+    SetConsoleOutputCP(CP_UTF8);
+
+    //vector holding every basketball player, important for the user to know their options and helps with input
+    vector<BasketballPlayer> bballers;
+    //holds the index of each player in bballers, which is important for knowing where a player is stored in bballers, making access easy
+    unordered_map<string,int> indHolderBBall;
+    Graph bballGraph = createBBallGraph(bballers,indHolderBBall);
+
+    //vector holding all soccer players in the map, important so the user knows what options they have and helps with dealing with input
+    vector<SoccerPlayer> fballers;
+    //holds the index of each player in fballers, which is important for knowing where a player is stored in fballers, making access easy
+    unordered_map<string,int> indHolderFBall;
+    Graph fballGraph = createFBallGraph(fballers,indHolderFBall);
 }

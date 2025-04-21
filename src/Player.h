@@ -9,8 +9,8 @@
 using namespace std;
 
 class Player {
-    string name;
-    map<int,string> teamTime;
+    string name; //holds the name of a player
+    map<int,string> teamTime; //use an ordered map here because it's easier to manage by year, represents the team a player was on during a given year
 public:
     Player(string name);
     Player();
@@ -25,7 +25,7 @@ public:
     bool operator<=(const Player& other) const;
     bool operator>=(const Player& other) const;
 };
-
+//hash for player so it can be used in unordered maps and sets, which are more efficient
 namespace std {
     template<>
     struct hash<Player> {
