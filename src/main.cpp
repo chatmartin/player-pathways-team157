@@ -288,6 +288,11 @@ int main(){
     CROW_ROUTE(app, "/bballAlgo")
     .methods("POST"_method)([&bballGraph,&bballers,&indHolderBBall](const crow::request& req) {
         auto body = json::parse(req.body);
+        if(!body.contains("from") || !body.contains("to") ||
+            indHolderBBall.find(body["from"])==indHolderBBall.end() ||
+            indHolderBBall.find(body["to"])==indHolderBBall.end()) {
+            return crow::response(400,"Please input valid NBA players from 1992-2022.");
+        }
         string from = body["from"];
         string to = body["to"];
         const Player& src = bballers[indHolderBBall.at(from)];
@@ -301,26 +306,26 @@ int main(){
             string reason;
             if(c == 1) {
                 auto tt = (bballers[indHolderBBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
-                for(auto p: b.getTeamTime) {
+                for(auto p: b.getTeamTime()) {
                     if(tt.find(p.first) != tt.end()) {
                         if(tt[p.first] == p.second) {
-                            reason = "was in the team " + p.second + " in the year " + to_string(p.first) + " with";
+                            reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
                             break;
                         }
                     }
                 }
             }
             else if(c == 5) {
-                reason = "got " + to_string(b.getPoints()) + " points like";
+                reason = " got " + to_string(b.getPoints()) + " points like ";
             }
             else if(c == 6) {
-                reason = "got " + to_string(b.getRebounds()) + " rebounds like";
+                reason = " got " + to_string(b.getRebounds()) + " rebounds like ";
             }
             else if(c == 7) {
-                reason = "played " + to_string(b.getGamesPlayed()) + " games like";
+                reason = " played " + to_string(b.getGamesPlayed()) + " games like ";
             }
             else if(c == 8) {
-                reason = "got " + to_string(b.getAssists()) + " assists like";
+                reason = " got " + to_string(b.getAssists()) + " assists like ";
             }
             trueBfsPath.emplace_back(b,reason);
         }
@@ -332,26 +337,26 @@ int main(){
             string reason;
             if(c == 1) {
                 auto tt = (bballers[indHolderBBall.at(dijkPath[i+1].first.getName())]).getTeamTime();
-                for(auto p: b.getTeamTime) {
+                for(auto p: b.getTeamTime()) {
                     if(tt.find(p.first) != tt.end()) {
                         if(tt[p.first] == p.second) {
-                            reason = "was in the team " + p.second + " in the year " + to_string(p.first) + " with";
+                            reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
                             break;
                         }
                     }
                 }
             }
             else if(c == 5) {
-                reason = "got " + to_string(b.getPoints()) + " points like";
+                reason = " got " + to_string(b.getPoints()) + " points like ";
             }
             else if(c == 6) {
-                reason = "got " + to_string(b.getRebounds()) + " rebounds like";
+                reason = " got " + to_string(b.getRebounds()) + " rebounds like ";
             }
             else if(c == 7) {
-                reason = "played " + to_string(b.getGamesPlayed()) + " games like";
+                reason = " played " + to_string(b.getGamesPlayed()) + " games like ";
             }
             else if(c == 8) {
-                reason = "got " + to_string(b.getAssists()) + " assists like";
+                reason = " got " + to_string(b.getAssists()) + " assists like ";
             }
             trueDijkPath.emplace_back(b,reason);
         }
@@ -365,6 +370,11 @@ int main(){
     CROW_ROUTE(app, "/fballAlgo")
     .methods("POST"_method)([&fballGraph,&fballers,&indHolderFBall](const crow::request& req) {
         auto body = json::parse(req.body);
+        if(!body.contains("from") || !body.contains("to") ||
+            indHolderFBall.find(body["from"])==indHolderFBall.end() ||
+            indHolderFBall.find(body["to"])==indHolderFBall.end()) {
+            return crow::response(400,"Please input valid soccer players.");
+        }
         string from = body["from"];
         string to = body["to"];
         const Player& src = fballers[indHolderFBall.at(from)];
@@ -377,10 +387,10 @@ int main(){
             Graph::Connection c = bfsPath[i+1].second;
             string reason;
             if(c == 1) {
-                auto tt = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
-                for(auto p: f.getTeamTime) {
-                    if(tt.find(p.first) != tt.end()) {
-                        if(tt[p.first] == p.second) {
+                auto nextTT = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
+                for(auto p: f.getTeamTime()) {
+                    if(nextTT.find(p.first) != nextTT.end()) {
+                        if(nextTT[p.first] == p.second) {
                             reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
                             break;
                         }
@@ -394,7 +404,7 @@ int main(){
                 reason = " got " + to_string(f.getYellowCards()) + " yellow cards like ";
             }
             else if(c == 7) {
-                reason = "played " + to_string(f.getAppearances()) + " games like";
+                reason = " played " + to_string(f.getAppearances()) + " games like ";
             }
             else if(c == 8) {
                 reason = " got " + to_string(f.getAssists()) + " assists like ";
@@ -408,10 +418,10 @@ int main(){
             Graph::Connection c = dijkPath[i].second;
             string reason;
             if(c == 1) {
-                auto tt = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
-                for(auto p: f.getTeamTime) {
-                    if(tt.find(p.first) != tt.end()) {
-                        if(tt[p.first] == p.second) {
+                auto nextTT = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
+                for(auto p: f.getTeamTime()) {
+                    if(nextTT.find(p.first) != nextTT.end()) {
+                        if(nextTT[p.first] == p.second) {
                             reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
                             break;
                         }
@@ -425,7 +435,7 @@ int main(){
                 reason = " got " + to_string(f.getYellowCards()) + " yellow cards like ";
             }
             else if(c == 7) {
-                reason = "played " + to_string(f.getAppearances()) + " games like";
+                reason = " played " + to_string(f.getAppearances()) + " games like ";
             }
             else if(c == 8) {
                 reason = " got " + to_string(f.getAssists()) + " assists like ";

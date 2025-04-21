@@ -20,4 +20,4 @@ include_directories("cmake-build-debug/asio-asio-1-18-2/asio/include")
 
 include_directories("src")
 
-target_link_libraries(player_pathways_team157 PRIVATE ws2_32)
+target_link_libraries(player_pathways_team157 PRIVATE ws2_32 mswsock)

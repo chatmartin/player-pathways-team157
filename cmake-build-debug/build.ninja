@@ -94,7 +94,7 @@ build CMakeFiles/player_pathways_team157.dir/src/Graph.cpp.obj: CXX_COMPILER__pl
 
 build player_pathways_team157.exe: CXX_EXECUTABLE_LINKER__player_pathways_team157_Debug CMakeFiles/player_pathways_team157.dir/src/main.cpp.obj CMakeFiles/player_pathways_team157.dir/src/Player.cpp.obj CMakeFiles/player_pathways_team157.dir/src/SoccerPlayer.cpp.obj CMakeFiles/player_pathways_team157.dir/src/BasketballPlayer.cpp.obj CMakeFiles/player_pathways_team157.dir/src/Graph.cpp.obj
   FLAGS = -g
-  LINK_LIBRARIES = -lws2_32  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = -lws2_32  -lmswsock  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\player_pathways_team157.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
