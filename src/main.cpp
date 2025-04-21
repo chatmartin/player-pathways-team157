@@ -1,13 +1,12 @@
-
 #include <algorithm>
 #include "Graph.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <unordered_set>
 #include <cmath>
 #define ASIO_STANDALONE
 #include "crow.h"
+#include <chrono>
 
 using namespace std;
 
@@ -15,7 +14,7 @@ using namespace std;
 struct CORSHandler {
     struct context {};
 
-    void before_handle(crow::request& req, crow::response& res, context&) {
+    static void before_handle(const crow::request& req, crow::response& res, context&) {
         res.add_header("Access-Control-Allow-Origin", "*");
         res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         res.add_header("Access-Control-Allow-Headers", "Content-Type");
@@ -25,7 +24,7 @@ struct CORSHandler {
         }
     }
 
-    void after_handle(crow::request& req, crow::response& res, context&) {
+    static void after_handle(crow::request& req, crow::response& res, context&) {
         res.add_header("Access-Control-Allow-Origin", "*");
     }
 };
@@ -297,8 +296,14 @@ int main(){
         string to = body["to"];
         const Player& src = bballers[indHolderBBall.at(from)];
         const Player& dest = bballers[indHolderBBall.at(to)];
+        auto start = chrono::high_resolution_clock::now();
         auto bfsPath = bballGraph.shortestPathBFS(src,dest);
+        auto stop = chrono::high_resolution_clock::now();
+        auto bfsTime = duration_cast<chrono::seconds>(start - stop);
+        start = chrono::high_resolution_clock::now();
         auto dijkPath = bballGraph.shortestPathDijkstra(src,dest);
+        stop = chrono::high_resolution_clock::now();
+        auto dijkTime = duration_cast<chrono::seconds>(stop - start);
         vector<pair<BasketballPlayer,string>> trueBfsPath;
         for(int i = 0; i < bfsPath.size()-1; i++) {
             BasketballPlayer b = (bballers[indHolderBBall.at(bfsPath[i].first.getName())]);
@@ -306,7 +311,7 @@ int main(){
             string reason;
             if(c == 1) {
                 auto tt = (bballers[indHolderBBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
-                for(auto p: b.getTeamTime()) {
+                for(const auto& p: b.getTeamTime()) {
                     if(tt.find(p.first) != tt.end()) {
                         if(tt[p.first] == p.second) {
                             reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
@@ -337,7 +342,7 @@ int main(){
             string reason;
             if(c == 1) {
                 auto tt = (bballers[indHolderBBall.at(dijkPath[i+1].first.getName())]).getTeamTime();
-                for(auto p: b.getTeamTime()) {
+                for(const auto& p: b.getTeamTime()) {
                     if(tt.find(p.first) != tt.end()) {
                         if(tt[p.first] == p.second) {
                             reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
@@ -363,7 +368,9 @@ int main(){
         trueDijkPath.emplace_back(bballers[indHolderBBall.at(dijkPath[dijkPath.size()-1].first.getName())],"");
         json j;
         j["bfsPath"] = trueBfsPath;
+        j["bfsTime"] = bfsTime.count();
         j["dijkPath"] = trueDijkPath;
+        j["dijkTime"] = dijkTime.count();
         return crow::response{j.dump()};
     });
 
@@ -379,8 +386,14 @@ int main(){
         string to = body["to"];
         const Player& src = fballers[indHolderFBall.at(from)];
         const Player& dest = fballers[indHolderFBall.at(to)];
+        auto start = chrono::high_resolution_clock::now();
         auto bfsPath = fballGraph.shortestPathBFS(src,dest);
+        auto stop = chrono::high_resolution_clock::now();
+        auto bfsTime = duration_cast<chrono::seconds>(start - stop);
+        start = chrono::high_resolution_clock::now();
         auto dijkPath = fballGraph.shortestPathDijkstra(src,dest);
+        stop = chrono::high_resolution_clock::now();
+        auto dijkTime = duration_cast<chrono::seconds>(stop - start);
         vector<pair<SoccerPlayer,string>> trueBfsPath;
         for(int i = 0; i < bfsPath.size()-1; i++) {
             SoccerPlayer f = (fballers[indHolderFBall.at(bfsPath[i].first.getName())]);
@@ -388,7 +401,7 @@ int main(){
             string reason;
             if(c == 1) {
                 auto nextTT = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
-                for(auto p: f.getTeamTime()) {
+                for(const auto& p: f.getTeamTime()) {
                     if(nextTT.find(p.first) != nextTT.end()) {
                         if(nextTT[p.first] == p.second) {
                             reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
@@ -419,7 +432,7 @@ int main(){
             string reason;
             if(c == 1) {
                 auto nextTT = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
-                for(auto p: f.getTeamTime()) {
+                for(const auto& p: f.getTeamTime()) {
                     if(nextTT.find(p.first) != nextTT.end()) {
                         if(nextTT[p.first] == p.second) {
                             reason = " was in the team " + p.second + " in the year " + to_string(p.first) + " with ";
@@ -445,7 +458,9 @@ int main(){
         trueDijkPath.emplace_back(fballers[indHolderFBall.at(dijkPath[dijkPath.size()-1].first.getName())],"");
         json j;
         j["bfsPath"] = trueBfsPath;
+        j["bfsTime"] = bfsTime.count();
         j["dijkPath"] = trueDijkPath;
+        j["dijkTime"] = dijkTime.count();
         return crow::response{j.dump()};
     });
 

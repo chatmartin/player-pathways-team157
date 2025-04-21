@@ -14,9 +14,9 @@ add_executable(player_pathways_team157
         src/Graph.h
         src/Graph.cpp)
 
-include_directories("cmake-build-debug/Crow-1.2.0-Darwin/include")
+include_directories("src/Crow-1.2.0-Darwin/include")
 
-include_directories("cmake-build-debug/asio-asio-1-18-2/asio/include")
+include_directories("src/asio-asio-1-18-2/asio/include")
 
 include_directories("src")
 
