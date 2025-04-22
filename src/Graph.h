@@ -6,7 +6,6 @@
 #include "BasketballPlayer.h"
 #include <vector>
 #include "json.hpp"
-using json = nlohmann::json;
 using namespace std;
 class Graph {
 public:
@@ -19,7 +18,6 @@ public:
     vector<pair<Player,Connection>> shortestPathDijkstra(const Player& src, const Player& dest); //finds the shortest path between two players using Dijkstra's
     vector<Player> checkConnectivity(const Player& src); //checks if a graph is connected, returns a vector of the non-connected vertices
     unordered_map<Player,unordered_map<Player,Connection>>& getAdjList();
-    json toJson();
 private:
     unordered_map<Player,unordered_map<Player,Connection>> adjList; //an adjacency list of players, first component is a player, second is a map with adjacent players and the thing that connects them
 };
