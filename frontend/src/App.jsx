@@ -5,31 +5,33 @@ import {
   Box,
   Container,
   Typography,
-  Grid,
-  FormControlLabel,
   Switch,
   CircularProgress,
   Alert,
   CssBaseline,
   Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  FormControlLabel,
   Button,
   Icon,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PathDisplay from './components/PathDisplay';
 
 const API_ROOT = 'http://localhost:18080';
 
+/* ---------- menu height ( ≈ 5 rows ) ------------------------------------- */
+const ITEM_HEIGHT = 48;
+const MAX_LIST_HEIGHT = ITEM_HEIGHT * 5.5;
+
+/* ---------- styled helpers ---------------------------------------------- */
 const StyledPaper = styled(Paper)(({ theme }) => ({
   maxWidth: 1300,
   width: '100%',
   borderRadius: 12,
   boxShadow: theme.shadows[6],
-  padding: theme.spacing(6), 
+  padding: theme.spacing(6),
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -40,9 +42,14 @@ const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
   marginRight: theme.spacing(4),
 }));
 
-const StyledFormControl = styled(FormControl)(({ theme }) => ({
+/* an Autocomplete that takes all available width
+   and forces its popper to follow the field width */
+const StyledAuto = styled(Autocomplete)(({ theme }) => ({
   flex: 1,
   margin: theme.spacing(1, 0),
+  '& .MuiAutocomplete-popper': {
+    width: '100% !important',
+  },
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
@@ -66,17 +73,19 @@ const InfoBox = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }));
 
+/* ======================================================================== */
 export default function App() {
-  const [sport, setSport] = useState('basketball');
-  const [compareAlgos, setCompareAlgos] = useState(true);
-  const [players, setPlayers] = useState([]);
-  const [selectedFrom, setSelectedFrom] = useState('');
-  const [selectedTo, setSelectedTo] = useState('');
-  const [results, setResults] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [showInfoBox, setShowInfoBox] = useState(true);
+  const [sport,         setSport]         = useState('basketball');
+  const [compareAlgos,  setCompareAlgos]  = useState(true);
+  const [players,       setPlayers]       = useState([]);
+  const [selectedFrom,  setSelectedFrom]  = useState('');
+  const [selectedTo,    setSelectedTo]    = useState('');
+  const [results,       setResults]       = useState(null);
+  const [error,         setError]         = useState(null);
+  const [loading,       setLoading]       = useState(false);
+  const [showInfoBox,   setShowInfoBox]   = useState(true);
 
+  /* --- fetch players whenever the sport changes ------------------------- */
   useEffect(() => {
     (async () => {
       try {
@@ -85,35 +94,32 @@ export default function App() {
         const { data } = await axios.get(`${API_ROOT}${endpoint}`);
         setPlayers(data.players || []);
         setError(null);
-      } catch (e) {
+      } catch {
         setError('Failed to fetch players. Please try again later.');
         setPlayers([]);
       } finally {
         setLoading(false);
       }
     })();
+
+    /* reset state when switching sports */
     setSelectedFrom('');
     setSelectedTo('');
     setResults(null);
     setShowInfoBox(true);
   }, [sport]);
 
-  /* ------------------------------ search path ------------------------------ */
+  /* --- run algorithm ----------------------------------------------------- */
   const handleSearch = async () => {
-    if (!selectedFrom || !selectedTo) {
-      setError('Please select both players');
-      return;
-    }
-    if (selectedFrom === selectedTo) {
-      setError('Please select two different players');
-      return;
-    }
+    if (!selectedFrom || !selectedTo)   return setError('Please select both players');
+    if (selectedFrom === selectedTo)    return setError('Please select two different players');
+
     setLoading(true);
     try {
       const endpoint = sport === 'basketball' ? '/bballAlgo' : '/fballAlgo';
       const { data } = await axios.post(`${API_ROOT}${endpoint}`, {
         from: selectedFrom,
-        to: selectedTo,
+        to:   selectedTo,
       });
       setResults(data);
       setError(null);
@@ -125,32 +131,47 @@ export default function App() {
     }
   };
 
+  /* hide / show info box */
   useEffect(() => {
-    if (selectedFrom && selectedTo && selectedFrom !== selectedTo) {
-      setShowInfoBox(false);
-    } else {
-      setShowInfoBox(true);
-    }
+    setShowInfoBox(!(selectedFrom && selectedTo && selectedFrom !== selectedTo));
   }, [selectedFrom, selectedTo]);
 
+  /* --- common props for both Autocompletes ------------------------------ */
+  const autoProps = {
+    options: players,
+    getOptionLabel: (o) => o?.name ?? '',
+    isOptionEqualToValue: (o, v) => o.name === v.name,
+    disablePortal: true,                              // popper inside Paper
+    ListboxProps: { style: { maxHeight: MAX_LIST_HEIGHT } },
+  };
+
   return (
-    <Container disableGutters maxWidth={false} sx={{ minHeight: '100vh', p: 4,
-      display:'flex', justifyContent:'center', alignItems:'center', bgcolor:'#f9fafb' }}>
+    <Container
+      disableGutters
+      maxWidth={false}
+      sx={{
+        minHeight: '100vh',
+        p: 4,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        bgcolor: '#f9fafb',
+      }}
+    >
       <CssBaseline />
       <StyledPaper>
         <Typography variant="h3" align="center" fontWeight={600} mb={4}>
           Player&nbsp;Connection&nbsp;Visualizer
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 4, mb: 4, justifyContent: 'center', flexWrap: 'wrap' }}> 
+        {/* --- switches ---------------------------------------------------- */}
+        <Box sx={{ display: 'flex', gap: 4, mb: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
           <StyledFormControlLabel
             label={`Switch to ${sport === 'basketball' ? 'Soccer' : 'Basketball'}`}
             control={
               <Switch
                 checked={sport === 'soccer'}
-                onChange={() =>
-                  setSport(prev => (prev === 'basketball' ? 'soccer' : 'basketball'))
-                }
+                onChange={() => setSport((p) => (p === 'basketball' ? 'soccer' : 'basketball'))}
               />
             }
           />
@@ -159,67 +180,61 @@ export default function App() {
             control={
               <Switch
                 checked={compareAlgos}
-                onChange={e => setCompareAlgos(e.target.checked)}
+                onChange={(e) => setCompareAlgos(e.target.checked)}
               />
             }
           />
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 3, width: '100%', maxWidth: 850, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <StyledFormControl fullWidth>
-            <InputLabel id="select-player-a-label">Select Player A</InputLabel>
-            <Select
-              labelId="select-player-a-label"
-              id="playerA"
-              value={selectedFrom}
-              label="Select Player A"
-              onChange={(e) => setSelectedFrom(e.target.value)}
-            >
-              <MenuItem value="" disabled>Select Player A</MenuItem>
-              {players.map((player) => (
-                <MenuItem key={player.id} value={player.name}>
-                  {player.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+        {/* --- player pickers + button ------------------------------------ */}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 3,
+            width: '100%',
+            maxWidth: 850,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+          }}
+        >
+          {/* Player A */}
+          <StyledAuto
+            {...autoProps}
+            value={players.find((p) => p.name === selectedFrom) || null}
+            onChange={(_, v) => setSelectedFrom(v ? v.name : '')}
+            renderInput={(params) => (
+              <TextField {...params} label="Select Player A" variant="outlined" fullWidth />
+            )}
+          />
 
-          <StyledFormControl fullWidth>
-            <InputLabel id="select-player-b-label">Select Player B</InputLabel>
-            <Select
-              labelId="select-player-b-label"
-              id="playerB"
-              value={selectedTo}
-              label="Select Player B"
-              onChange={(e) => setSelectedTo(e.target.value)}
-            >
-              <MenuItem value="" disabled>Select Player B</MenuItem>
-              {players.map((player) => (
-                <MenuItem key={player.id} value={player.name}>
-                  {player.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+          {/* Player B */}
+          <StyledAuto
+            {...autoProps}
+            value={players.find((p) => p.name === selectedTo) || null}
+            onChange={(_, v) => setSelectedTo(v ? v.name : '')}
+            renderInput={(params) => (
+              <TextField {...params} label="Select Player B" variant="outlined" fullWidth />
+            )}
+          />
 
+          {/* search button */}
           <StyledButton
             variant="contained"
             color="primary"
             onClick={handleSearch}
             disabled={!selectedFrom || !selectedTo || selectedFrom === selectedTo || loading}
           >
-            Find Path
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Find Path'}
           </StyledButton>
         </Box>
 
-        {showInfoBox && (
-          <InfoBox>
-            Select two players to visualize their connection
-          </InfoBox>
+        {showInfoBox && <InfoBox>Select two players to visualize their connection</InfoBox>}
+        {!!error && (
+          <Alert severity="error" sx={{ mt: 3, width: '100%', maxWidth: 850 }}>
+            {error}
+          </Alert>
         )}
-
-        {error && <Alert severity="error" sx={{ mt: 3, width: '100%', maxWidth: 850 }}>{error}</Alert>}
-        {loading && <CircularProgress sx={{ display:'block', mx:'auto', mt:4 }} />}
+        {loading && !results && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 4 }} />}
 
         {results && (
           <PathDisplay
