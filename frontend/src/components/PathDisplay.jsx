@@ -1,82 +1,124 @@
-//PathDisplay.jsx 
+// PathDisplay.jsx
 import React from 'react';
-import { Box, Typography, List, ListItem, ListItemText, Divider, Chip, Alert } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Chip,
+  Stepper,
+  Step,
+  StepLabel,
+  Alert,
+} from '@mui/material';
+import ForceGraph2D from 'react-force-graph-2d'; 
 
-const PathDisplay = ({ results, sport, showBoth }) => {
-  const renderConnection = (reason) => {
-    if (!reason) return '';
-    if (reason.includes('team')) return '🏟️ Team';
-    if (reason.includes('goals')) return '🥅 Goals';
-    if (reason.includes('yellow')) return '⚠️ Discipline';
-    if (reason.includes('games')) return '👟 Appearances';
-    if (reason.includes('points')) return '🏅 Points';
-    if (reason.includes('rebounds')) return '✋ Rebounds';
-    if (reason.includes('assists')) return '🎯 Assists';
-    return '🔗 Connection';
+/* ------------------------------------------------------------------ */
+/* helper to translate edge “reason” into an icon / short label       */
+const iconFor = (reason = '') => {
+  if (reason.includes('team'))     return '🏟️';
+  if (reason.includes('goals'))    return '🥅';
+  if (reason.includes('yellow'))   return '⚠️';
+  if (reason.includes('games'))    return '👟';
+  if (reason.includes('points'))   return '🏅';
+  if (reason.includes('rebounds')) return '✋';
+  if (reason.includes('assists'))  return '🎯';
+  return '🔗';
+};
+
+/* ------------ helper: path  → nodes / links for the graph -------------- */
+const graphFromPath = (path = []) => {
+    const nodes = path.map(([p]) => ({ id: p.name }));
+    const links = path.slice(1).map(([, r], i) => ({
+      source: path[i][0].name,
+      target: path[i + 1][0].name,
+      label : r,
+    }));
+    return { nodes, links };
   };
-
-  const renderPath = (path, algorithm) => {
-    if (!Array.isArray(path)) {
+  
+  /* ------------ reusable visual block  (stepper + graph) ----------------- */
+  function PathBlock({ path, algorithm, time }) {
+    /* empty / no path */
+    if (!Array.isArray(path) || !path.length) {
       return (
         <Alert severity="info" sx={{ mt: 2 }}>
           No path found using {algorithm}
         </Alert>
       );
     }
-
+  
+    const orientation = path.length > 7 ? 'vertical' : 'horizontal';
+    const graphData  = graphFromPath(path);
+  
     return (
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 6 }}>
+        {/* title */}
         <Typography variant="h5" gutterBottom>
-          {algorithm} Path ({results[`${algorithm}Time`]}s)
+          {algorithm} Path&nbsp;
+          <Chip label={`${time}s`} size="small" color="primary" />
         </Typography>
-        <List dense sx={{ bgcolor: 'background.paper' }}>
-          {path.map(([player, reason], index) => (
-            <React.Fragment key={index}>
-              <ListItem alignItems="flex-start">
-                <ListItemText
-                  primary={player?.name || 'Unknown player'}
-                  secondary={
-                    index < path.length - 1 && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                        <Chip
-                          label={renderConnection(reason)}
-                          size="small"
-                          sx={{ mr: 1 }}
-                        />
-                        <Typography variant="body2" component="span">
-                          {reason}
-                        </Typography>
-                      </Box>
-                    )
-                  }
-                />
-              </ListItem>
-              {index < path.length - 1 && <Divider component="li" />}
-            </React.Fragment>
+  
+        {/* stepper */}
+        <Stepper
+          orientation={orientation}
+          alternativeLabel={orientation === 'horizontal'}
+          sx={orientation === 'horizontal' ? { overflowX: 'auto', pb: 2 } : {}}
+        >
+          {path.map(([player, reason], idx) => (
+            <Step key={idx} completed>
+              <StepLabel
+                optional={
+                  idx < path.length - 1 && reason ? (
+                    <Chip label={iconFor(reason)} size="small" />
+                  ) : null
+                }
+              >
+                {player.name}
+              </StepLabel>
+            </Step>
           ))}
-        </List>
+        </Stepper>
+  
+        {/* force‑directed graph */}
+        <ForceGraph2D
+          graphData={graphData}
+          nodeLabel="id"
+          width={800}
+          height={400}
+          linkDirectionalArrowLength={4}
+          linkDirectionalArrowRelPos={1}
+          nodeCanvasObjectMode={() => 'after'}  // draw labels
+          nodeCanvasObject={(node, ctx) => {
+            ctx.fillStyle = '#000';
+            ctx.font      = '10px sans-serif';
+            ctx.fillText(node.id, node.x + 6, node.y + 2);
+          }}
+        />
+      </Box>
+    );
+  }
+  
+  /* ------------ wrapper originally exported from this file --------------- */
+  const PathDisplay = ({ results, showBoth }) => {
+    const bfsPath  = results?.bfsPath  || [];
+    const djkPath  = results?.dijkPath || [];
+    const bfsTime  = results?.bfsTime  ?? 0;
+    const djkTime  = results?.dijkTime ?? 0;
+    const fasterIsBfs = bfsTime < djkTime;
+  
+    return (
+      <Box>
+        {showBoth ? (
+          <>
+            <PathBlock path={bfsPath}  algorithm="BFS"      time={bfsTime} />
+            <PathBlock path={djkPath}  algorithm="Dijkstra" time={djkTime} />
+          </>
+        ) : fasterIsBfs ? (
+          <PathBlock path={bfsPath}  algorithm="BFS"      time={bfsTime} />
+        ) : (
+          <PathBlock path={djkPath}  algorithm="Dijkstra" time={djkTime} />
+        )}
       </Box>
     );
   };
-
-  const bfsPath = results?.bfsPath || [];
-  const dijkPath = results?.dijkPath || [];
-
-  return (
-    <Box>
-      {showBoth ? (
-        <>
-          {renderPath(bfsPath, 'BFS')}
-          {renderPath(dijkPath, 'Dijkstra')}
-        </>
-      ) : (
-        renderPath(
-          results.bfsTime < results.dijkTime ? bfsPath : dijkPath,
-          results.bfsTime < results.dijkTime ? 'BFS' : 'Dijkstra'
-        )
-      )}
-    </Box>
-  );
-};
-
-export default PathDisplay;
+  
+  export default PathDisplay;

@@ -239,7 +239,6 @@ export default function App() {
         {results && (
           <PathDisplay
             results={results}
-            sport={sport}
             showBoth={compareAlgos}
             sx={{ mt: 4, width: '100%', maxWidth: 850 }}
           />
