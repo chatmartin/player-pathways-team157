@@ -1,4 +1,3 @@
-// PathDisplay.jsx
 import React from "react";
 import {
   Box,
@@ -7,7 +6,8 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Alert
+  Alert,
+  Tooltip     //  ← NEW
 } from "@mui/material";
 
 /* ------------------------------------------------------------------ */
@@ -40,28 +40,29 @@ function PathBlock({ path, algorithm, time }) {
 
   return (
     <Box sx={{ mb: 6 }}>
-      {/* title */}
-      <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+      <Typography variant="h5" gutterBottom sx={{ mb: 2 /* extra space */ }}>
         {algorithm} Path&nbsp;
         <Chip label={`${time}s`} size="small" color="primary" />
       </Typography>
 
-      {/* stepper */}
       <Stepper
         orientation={orientation}
         alternativeLabel={orientation === "horizontal"}
         sx={
-            orientation === 'horizontal'
-            ? { mt: 4, overflowX: 'auto', pb: 2 }
-            : { mt: 1 }  
-        } 
-        >
+          orientation === "horizontal"
+            ? { mt: 4, overflowX: "auto", pb: 2 }  // space above + scroll if long
+            : { mt: 1 }
+        }
+      >
         {path.map(([player, reason], idx) => (
           <Step key={idx} completed>
             <StepLabel
               optional={
                 idx < path.length - 1 && reason ? (
-                  <Chip label={iconFor(reason)} size="small" />
+                  /* -------------------  TOOLTIP HERE  ------------------- */
+                  <Tooltip title={reason} arrow placement="top">
+                    <Chip label={iconFor(reason)} size="small" />
+                  </Tooltip>
                 ) : null
               }
             >
