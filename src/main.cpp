@@ -14,7 +14,7 @@ using namespace std;
 struct CORSHandler {
     struct context {};
 
-    static void before_handle(const crow::request& req, crow::response& res, context&) {
+    void before_handle(crow::request& req, crow::response& res, context&) {
         res.add_header("Access-Control-Allow-Origin", "*");
         res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         res.add_header("Access-Control-Allow-Headers", "Content-Type");
@@ -24,7 +24,7 @@ struct CORSHandler {
         }
     }
 
-    static void after_handle(crow::request& req, crow::response& res, context&) {
+    void after_handle(crow::request& req, crow::response& res, context&) {
         res.add_header("Access-Control-Allow-Origin", "*");
     }
 };
@@ -299,11 +299,11 @@ int main(){
         auto start = chrono::high_resolution_clock::now();
         auto bfsPath = bballGraph.shortestPathBFS(src,dest);
         auto stop = chrono::high_resolution_clock::now();
-        auto bfsTime = duration_cast<chrono::seconds>(start - stop);
+        auto bfsTime = chrono::duration_cast<chrono::seconds>(start - stop);
         start = chrono::high_resolution_clock::now();
         auto dijkPath = bballGraph.shortestPathDijkstra(src,dest);
         stop = chrono::high_resolution_clock::now();
-        auto dijkTime = duration_cast<chrono::seconds>(stop - start);
+        auto dijkTime = chrono::duration_cast<chrono::seconds>(stop - start);
         vector<pair<BasketballPlayer,string>> trueBfsPath;
         for(int i = 0; i < bfsPath.size()-1; i++) {
             BasketballPlayer b = (bballers[indHolderBBall.at(bfsPath[i].first.getName())]);
@@ -389,11 +389,11 @@ int main(){
         auto start = chrono::high_resolution_clock::now();
         auto bfsPath = fballGraph.shortestPathBFS(src,dest);
         auto stop = chrono::high_resolution_clock::now();
-        auto bfsTime = duration_cast<chrono::seconds>(start - stop);
+        auto bfsTime = chrono::duration_cast<chrono::seconds>(start - stop);
         start = chrono::high_resolution_clock::now();
         auto dijkPath = fballGraph.shortestPathDijkstra(src,dest);
         stop = chrono::high_resolution_clock::now();
-        auto dijkTime = duration_cast<chrono::seconds>(stop - start);
+        auto dijkTime = chrono::duration_cast<chrono::seconds>(stop - start);
         vector<pair<SoccerPlayer,string>> trueBfsPath;
         for(int i = 0; i < bfsPath.size()-1; i++) {
             SoccerPlayer f = (fballers[indHolderFBall.at(bfsPath[i].first.getName())]);
