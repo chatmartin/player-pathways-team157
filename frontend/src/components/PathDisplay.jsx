@@ -1,3 +1,4 @@
+//PathDisplay.jsx 
 import React from 'react';
 import { Box, Typography, List, ListItem, ListItemText, Divider, Chip, Alert } from '@mui/material';
 

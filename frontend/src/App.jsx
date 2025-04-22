@@ -1,6 +1,8 @@
+// App.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
+  Box,
   Container,
   Typography,
   Grid,
@@ -8,121 +10,226 @@ import {
   Switch,
   CircularProgress,
   Alert,
-  CssBaseline
+  CssBaseline,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  Icon,
 } from '@mui/material';
-import PlayerSearchForm from './components/PlayerSearchForm';
+import { styled } from '@mui/material/styles';
 import PathDisplay from './components/PathDisplay';
 
-const App = () => {
+const API_ROOT = 'http://localhost:18080';
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  maxWidth: 1300,
+  width: '100%',
+  borderRadius: 12,
+  boxShadow: theme.shadows[6],
+  padding: theme.spacing(6), 
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: theme.spacing(5),
+}));
+
+const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
+  marginRight: theme.spacing(4),
+}));
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  flex: 1,
+  margin: theme.spacing(1, 0),
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  padding: theme.spacing(2, 5),
+  fontSize: '1.2rem',
+}));
+
+const InfoBox = styled(Box)(({ theme }) => ({
+  backgroundColor: '#e0f7fa',
+  color: '#00acc1',
+  padding: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+  textAlign: 'center',
+  fontSize: '0.9rem',
+  marginTop: theme.spacing(3),
+  maxWidth: 850,
+  width: '100%',
+  boxSizing: 'border-box',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+export default function App() {
   const [sport, setSport] = useState('basketball');
-  const [showBothAlgorithms, setShowBothAlgorithms] = useState(true);
+  const [compareAlgos, setCompareAlgos] = useState(true);
   const [players, setPlayers] = useState([]);
-  const [selectedPlayers, setSelectedPlayers] = useState({ from: null, to: null });
+  const [selectedFrom, setSelectedFrom] = useState('');
+  const [selectedTo, setSelectedTo] = useState('');
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showInfoBox, setShowInfoBox] = useState(true);
 
   useEffect(() => {
-    const fetchPlayers = async () => {
+    (async () => {
       try {
+        setLoading(true);
         const endpoint = sport === 'basketball' ? '/bball_graph' : '/fball_graph';
-        const response = await axios.get(`http://localhost:18080${endpoint}`);
-        setPlayers(response.data.players || []);
+        const { data } = await axios.get(`${API_ROOT}${endpoint}`);
+        setPlayers(data.players || []);
         setError(null);
-      } catch (err) {
+      } catch (e) {
         setError('Failed to fetch players. Please try again later.');
         setPlayers([]);
+      } finally {
+        setLoading(false);
       }
-    };
-    
-    fetchPlayers();
-    setSelectedPlayers({ from: null, to: null });
+    })();
+    setSelectedFrom('');
+    setSelectedTo('');
     setResults(null);
+    setShowInfoBox(true);
   }, [sport]);
 
+  /* ------------------------------ search path ------------------------------ */
   const handleSearch = async () => {
-    if (!selectedPlayers.from || !selectedPlayers.to) {
+    if (!selectedFrom || !selectedTo) {
       setError('Please select both players');
       return;
     }
-
+    if (selectedFrom === selectedTo) {
+      setError('Please select two different players');
+      return;
+    }
     setLoading(true);
     try {
       const endpoint = sport === 'basketball' ? '/bballAlgo' : '/fballAlgo';
-      const response = await axios.post(`http://localhost:18080${endpoint}`, {
-        from: selectedPlayers.from.name,
-        to: selectedPlayers.to.name
+      const { data } = await axios.post(`${API_ROOT}${endpoint}`, {
+        from: selectedFrom,
+        to: selectedTo,
       });
-      
-      setResults(response.data);
+      setResults(data);
       setError(null);
-    } catch (err) {
-      setError(err.response?.data || 'An error occurred during the search');
+    } catch (e) {
+      setError(e.response?.data || 'An error occurred during the search');
       setResults(null);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <Container component="main" maxWidth="lg">
-      <CssBaseline />
-      <Typography variant="h3" component="h1" gutterBottom align="center" sx={{ mt: 4 }}>
-        Player Connection Visualizer
-      </Typography>
+  useEffect(() => {
+    if (selectedFrom && selectedTo && selectedFrom !== selectedTo) {
+      setShowInfoBox(false);
+    } else {
+      setShowInfoBox(true);
+    }
+  }, [selectedFrom, selectedTo]);
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={6}>
-          <FormControlLabel
+  return (
+    <Container disableGutters maxWidth={false} sx={{ minHeight: '100vh', p: 4,
+      display:'flex', justifyContent:'center', alignItems:'center', bgcolor:'#f9fafb' }}>
+      <CssBaseline />
+      <StyledPaper>
+        <Typography variant="h3" align="center" fontWeight={600} mb={4}>
+          Player&nbsp;Connection&nbsp;Visualizer
+        </Typography>
+
+        <Box sx={{ display: 'flex', gap: 4, mb: 4, justifyContent: 'center', flexWrap: 'wrap' }}> 
+          <StyledFormControlLabel
+            label={`Switch to ${sport === 'basketball' ? 'Soccer' : 'Basketball'}`}
             control={
               <Switch
                 checked={sport === 'soccer'}
-                onChange={() => setSport(sport === 'basketball' ? 'soccer' : 'basketball')}
+                onChange={() =>
+                  setSport(prev => (prev === 'basketball' ? 'soccer' : 'basketball'))
+                }
               />
             }
-            label={`Switch to ${sport === 'basketball' ? 'Soccer' : 'Basketball'}`}
           />
-        </Grid>
-        <Grid item xs={6}>
-          <FormControlLabel
+          <StyledFormControlLabel
+            label="Compare both algorithms"
             control={
               <Switch
-                checked={showBothAlgorithms}
-                onChange={(e) => setShowBothAlgorithms(e.target.checked)}
+                checked={compareAlgos}
+                onChange={e => setCompareAlgos(e.target.checked)}
               />
             }
-            label="Compare both algorithms"
           />
-        </Grid>
-      </Grid>
+        </Box>
 
-      <PlayerSearchForm
-        sport={sport}
-        players={players}
-        selectedPlayers={selectedPlayers}
-        onSelect={(player, type) => setSelectedPlayers(prev => ({ ...prev, [type]: player }))}
-        onSearch={handleSearch}
-        loading={loading}
-      />
+        <Box sx={{ display: 'flex', gap: 3, width: '100%', maxWidth: 850, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <StyledFormControl fullWidth>
+            <InputLabel id="select-player-a-label">Select Player A</InputLabel>
+            <Select
+              labelId="select-player-a-label"
+              id="playerA"
+              value={selectedFrom}
+              label="Select Player A"
+              onChange={(e) => setSelectedFrom(e.target.value)}
+            >
+              <MenuItem value="" disabled>Select Player A</MenuItem>
+              {players.map((player) => (
+                <MenuItem key={player.id} value={player.name}>
+                  {player.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </StyledFormControl>
 
-      {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      )}
+          <StyledFormControl fullWidth>
+            <InputLabel id="select-player-b-label">Select Player B</InputLabel>
+            <Select
+              labelId="select-player-b-label"
+              id="playerB"
+              value={selectedTo}
+              label="Select Player B"
+              onChange={(e) => setSelectedTo(e.target.value)}
+            >
+              <MenuItem value="" disabled>Select Player B</MenuItem>
+              {players.map((player) => (
+                <MenuItem key={player.id} value={player.name}>
+                  {player.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </StyledFormControl>
 
-      {loading && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 4 }} />}
+          <StyledButton
+            variant="contained"
+            color="primary"
+            onClick={handleSearch}
+            disabled={!selectedFrom || !selectedTo || selectedFrom === selectedTo || loading}
+          >
+            Find Path
+          </StyledButton>
+        </Box>
 
-      {results && (
-        <PathDisplay
-          results={results}
-          sport={sport}
-          showBoth={showBothAlgorithms}
-          sx={{ mt: 4 }}
-        />
-      )}
+        {showInfoBox && (
+          <InfoBox>
+            Select two players to visualize their connection
+          </InfoBox>
+        )}
+
+        {error && <Alert severity="error" sx={{ mt: 3, width: '100%', maxWidth: 850 }}>{error}</Alert>}
+        {loading && <CircularProgress sx={{ display:'block', mx:'auto', mt:4 }} />}
+
+        {results && (
+          <PathDisplay
+            results={results}
+            sport={sport}
+            showBoth={compareAlgos}
+            sx={{ mt: 4, width: '100%', maxWidth: 850 }}
+          />
+        )}
+      </StyledPaper>
     </Container>
   );
-};
-
-export default App;
+}

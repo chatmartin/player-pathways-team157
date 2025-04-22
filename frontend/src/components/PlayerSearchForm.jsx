@@ -1,3 +1,4 @@
+//PlayerSearchForm.jsx
 import React from 'react';
 import { Autocomplete, TextField, Button, Grid, CircularProgress } from '@mui/material';
 
@@ -18,8 +19,16 @@ const PlayerSearchForm = ({ sport, players, selectedPlayers, onSelect, onSearch,
   };
 
   return (
-    <Grid container spacing={3} sx={{ mb: 4 }}>
-      <Grid item xs={12} md={5}>
+    <Grid 
+      container 
+      spacing={2}
+      justifyContent="center"
+      sx={{ 
+        mb: 4,
+        width: '100%'
+      }}
+    >
+      <Grid item xs={12} md={8} lg={5}>
         <Autocomplete
           options={players}
           loading={players.length === 0}
@@ -32,6 +41,7 @@ const PlayerSearchForm = ({ sport, players, selectedPlayers, onSelect, onSearch,
               {...params}
               label="Select Player A"
               variant="outlined"
+              fullWidth
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
@@ -49,7 +59,7 @@ const PlayerSearchForm = ({ sport, players, selectedPlayers, onSelect, onSearch,
         />
       </Grid>
 
-      <Grid item xs={12} md={5}>
+      <Grid item xs={12} md={8} lg={5}>
         <Autocomplete
           options={players}
           loading={players.length === 0}
@@ -62,6 +72,7 @@ const PlayerSearchForm = ({ sport, players, selectedPlayers, onSelect, onSearch,
               {...params}
               label="Select Player B"
               variant="outlined"
+              fullWidth
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
@@ -79,13 +90,23 @@ const PlayerSearchForm = ({ sport, players, selectedPlayers, onSelect, onSearch,
         />
       </Grid>
 
-      <Grid item xs={12} md={2} sx={{ display: 'flex', alignItems: 'center' }}>
+      <Grid 
+        item 
+        xs={12} 
+        md={8} 
+        lg={2} 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          alignItems: 'center' 
+        }}
+      >
         <Button
           variant="contained"
           size="large"
           onClick={onSearch}
           disabled={loading || !selectedPlayers.from || !selectedPlayers.to}
-          fullWidth
+          sx={{ height: '56px', width: '100%', maxWidth: '200px' }}
         >
           {loading ? <CircularProgress size={24} color="inherit" /> : 'Find Path'}
         </Button>
