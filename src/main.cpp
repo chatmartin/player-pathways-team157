@@ -8,27 +8,11 @@
 #include "crow.h"
 #include <chrono>
 #include <unordered_set>
+#include "crow/middlewares/cors.h"
+#include "crow/middlewares/session.h"
 
 using namespace std;
-
-struct CORSHandler {
-    struct context {};
-
-    void before_handle(crow::request& req, crow::response& res, context&) {
-        res.add_header("Access-Control-Allow-Origin", "*");
-        res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        res.add_header("Access-Control-Allow-Headers", "Content-Type");
-        if (req.method == "OPTIONS"_method) {
-            res.code = 204;
-            res.end();
-        }
-    }
-
-    void after_handle(crow::request& req, crow::response& res, context&) {
-        res.add_header("Access-Control-Allow-Origin", "*");
-    }
-};
-
+using json=nlohmann::json;
 //converts basketball players to json to be used in the frontend
 void to_json(json& j, const BasketballPlayer& bballer) {
     j = json{
@@ -259,7 +243,14 @@ int main(){
     createFBallGraph(fballers,indHolderFBall,fballGraph);
 
     using json = nlohmann::json;
-    crow::App<CORSHandler> app;
+    crow::App<crow::CORSHandler> app;
+    auto& cors = app.get_middleware<crow::CORSHandler>();
+    cors
+        .global()
+        .headers("Content-Type","X-Custom-Header","Upgrade-Insecure-Requests","Accept","Access-Control-Allow-Origin")
+        .methods("POST"_method,"GET"_method)
+        .origin("http://localhost:5173")
+        .max_age(3600);
 
     CROW_ROUTE(app, "/bball_graph")
     .methods("GET"_method)([&bballGraph,&bballers]() {
@@ -285,23 +276,25 @@ int main(){
         }
         string from = body["from"];
         string to = body["to"];
+        json j;
         const Player& src = bballers[indHolderBBall.at(from)];
         const Player& dest = bballers[indHolderBBall.at(to)];
         auto start = chrono::high_resolution_clock::now();
         auto bfsPath = bballGraph.shortestPathBFS(src,dest);
         auto stop = chrono::high_resolution_clock::now();
-        auto bfsTime = chrono::duration_cast<chrono::seconds>(start - stop);
+        auto bfsTime = chrono::duration_cast<chrono::milliseconds>(stop - start);
         start = chrono::high_resolution_clock::now();
         auto dijkPath = bballGraph.shortestPathDijkstra(src,dest);
         stop = chrono::high_resolution_clock::now();
-        auto dijkTime = chrono::duration_cast<chrono::seconds>(stop - start);
+        auto dijkTime = chrono::duration_cast<chrono::milliseconds>(stop - start);
         vector<pair<BasketballPlayer,string>> trueBfsPath;
         for(int i = 0; i < bfsPath.size()-1; i++) {
             BasketballPlayer b = (bballers[indHolderBBall.at(bfsPath[i].first.getName())]);
             Graph::Connection c = bfsPath[i+1].second;
             string reason;
+            auto b2 = (bballers[indHolderBBall.at(bfsPath[i+1].first.getName())]);
             if(c == 1) {
-                auto tt = (bballers[indHolderBBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
+                auto tt = b2.getTeamTime();
                 for(const auto& p: b.getTeamTime()) {
                     if(tt.find(p.first) != tt.end()) {
                         if(tt[p.first] == p.second) {
@@ -323,6 +316,9 @@ int main(){
             else if(c == 8) {
                 reason = " got " + to_string(b.getAssists()) + " assists like ";
             }
+            reason.insert(0,b.getName());
+            reason.append(b2.getName());
+            reason.append(".");
             trueBfsPath.emplace_back(b,reason);
         }
         trueBfsPath.emplace_back(bballers[indHolderBBall.at(bfsPath[bfsPath.size()-1].first.getName())],"");
@@ -331,8 +327,9 @@ int main(){
             BasketballPlayer b = (bballers[indHolderBBall.at(dijkPath[i].first.getName())]);
             Graph::Connection c = dijkPath[i].second;
             string reason;
+            auto b2 = (bballers[indHolderBBall.at(dijkPath[i+1].first.getName())]);
             if(c == 1) {
-                auto tt = (bballers[indHolderBBall.at(dijkPath[i+1].first.getName())]).getTeamTime();
+                auto tt = b2.getTeamTime();
                 for(const auto& p: b.getTeamTime()) {
                     if(tt.find(p.first) != tt.end()) {
                         if(tt[p.first] == p.second) {
@@ -354,19 +351,24 @@ int main(){
             else if(c == 8) {
                 reason = " got " + to_string(b.getAssists()) + " assists like ";
             }
+            reason.insert(0,b.getName());
+            reason.append(b2.getName());
+            reason.append(".");
             trueDijkPath.emplace_back(b,reason);
         }
         trueDijkPath.emplace_back(bballers[indHolderBBall.at(dijkPath[dijkPath.size()-1].first.getName())],"");
-        json j;
         j["bfsPath"] = trueBfsPath;
-        j["bfsTime"] = bfsTime.count();
+        double b = int(bfsTime.count())/1000.0;
+        j["bfsTime"] = b;
         j["dijkPath"] = trueDijkPath;
-        j["dijkTime"] = dijkTime.count();
+        double d = int(dijkTime.count())/1000.0;
+        j["dijkTime"] = d;
         return crow::response{j.dump()};
     });
 
     CROW_ROUTE(app, "/fballAlgo")
-    .methods("POST"_method)([&fballGraph,&fballers,&indHolderFBall](const crow::request& req) {
+    .methods("POST"_method)
+    ([&fballGraph,&fballers,&indHolderFBall](const crow::request& req) {
         auto body = json::parse(req.body);
         if(!body.contains("from") || !body.contains("to") ||
             indHolderFBall.find(body["from"])==indHolderFBall.end() ||
@@ -375,23 +377,25 @@ int main(){
         }
         string from = body["from"];
         string to = body["to"];
+        json j;
         const Player& src = fballers[indHolderFBall.at(from)];
         const Player& dest = fballers[indHolderFBall.at(to)];
         auto start = chrono::high_resolution_clock::now();
         auto bfsPath = fballGraph.shortestPathBFS(src,dest);
         auto stop = chrono::high_resolution_clock::now();
-        auto bfsTime = chrono::duration_cast<chrono::seconds>(start - stop);
+        auto bfsTime = chrono::duration_cast<chrono::milliseconds>(stop - start);
         start = chrono::high_resolution_clock::now();
         auto dijkPath = fballGraph.shortestPathDijkstra(src,dest);
         stop = chrono::high_resolution_clock::now();
-        auto dijkTime = chrono::duration_cast<chrono::seconds>(stop - start);
+        auto dijkTime = chrono::duration_cast<chrono::milliseconds>(stop - start);
         vector<pair<SoccerPlayer,string>> trueBfsPath;
         for(int i = 0; i < bfsPath.size()-1; i++) {
             SoccerPlayer f = (fballers[indHolderFBall.at(bfsPath[i].first.getName())]);
             Graph::Connection c = bfsPath[i+1].second;
             string reason;
+            auto f2 = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]);
             if(c == 1) {
-                auto nextTT = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
+                auto nextTT = f2.getTeamTime();
                 for(const auto& p: f.getTeamTime()) {
                     if(nextTT.find(p.first) != nextTT.end()) {
                         if(nextTT[p.first] == p.second) {
@@ -413,6 +417,9 @@ int main(){
             else if(c == 8) {
                 reason = " got " + to_string(f.getAssists()) + " assists like ";
             }
+            reason.insert(0,f.getName());
+            reason.append(f2.getName());
+            reason.append(".");
             trueBfsPath.emplace_back(f,reason);
         }
         if(!bfsPath.empty()){
@@ -421,14 +428,16 @@ int main(){
         else{
             string reason = "There is no connection between " + src.getName() + " and " + dest.getName();
             trueBfsPath.emplace_back(fballers[indHolderFBall[from]],reason);
+            trueBfsPath.emplace_back(fballers[indHolderFBall[to]],"");
         }
         vector<pair<SoccerPlayer,string>> trueDijkPath;
         for(int i = 0; i < dijkPath.size()-1; i++) {
             SoccerPlayer f = (fballers[indHolderFBall.at(dijkPath[i].first.getName())]);
             Graph::Connection c = dijkPath[i].second;
             string reason;
+            auto f2 = (fballers[indHolderFBall.at(dijkPath[i+1].first.getName())]);
             if(c == 1) {
-                auto nextTT = (fballers[indHolderFBall.at(bfsPath[i+1].first.getName())]).getTeamTime();
+                auto nextTT = f2.getTeamTime();
                 for(const auto& p: f.getTeamTime()) {
                     if(nextTT.find(p.first) != nextTT.end()) {
                         if(nextTT[p.first] == p.second) {
@@ -450,14 +459,25 @@ int main(){
             else if(c == 8) {
                 reason = " got " + to_string(f.getAssists()) + " assists like ";
             }
+            reason.insert(0,f.getName());
+            reason.append(f2.getName());
+            reason.append(".");
             trueDijkPath.emplace_back(f,reason);
         }
-        trueDijkPath.emplace_back(fballers[indHolderFBall.at(dijkPath[dijkPath.size()-1].first.getName())],"");
-        json j;
+        if(!bfsPath.empty()){
+            trueDijkPath.emplace_back(fballers[indHolderFBall.at(dijkPath[dijkPath.size()-1].first.getName())],"");
+        }
+        else{
+            string reason = "There is no connection between " + src.getName() + " and " + dest.getName();
+            trueDijkPath.emplace_back(fballers[indHolderFBall[from]],reason);
+            trueDijkPath.emplace_back(fballers[indHolderFBall[to]],"");
+        }
         j["bfsPath"] = trueBfsPath;
-        j["bfsTime"] = bfsTime.count();
+        double b = int(bfsTime.count())/1000.0;
+        j["bfsTime"] = b;
         j["dijkPath"] = trueDijkPath;
-        j["dijkTime"] = dijkTime.count();
+        double d = int(dijkTime.count())/1000.0;
+        j["dijkTime"] = d;
         return crow::response{j.dump()};
     });
 
