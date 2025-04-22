@@ -194,17 +194,3 @@ vector<Player> Graph::checkConnectivity(const Player &src) {
 unordered_map<Player,unordered_map<Player,Graph::Connection>>& Graph::getAdjList() {
     return adjList;
 }
-
-json Graph::toJson() {
-    json j;
-    for(auto p: adjList) {
-        for(auto couple: p.second) {
-            j["edges"].push_back({
-                {"source", p.first.getName()},
-                {"adjacent",couple.first.getName()},
-                {"connection",couple.second}
-            });
-        }
-    }
-    return j;
-}

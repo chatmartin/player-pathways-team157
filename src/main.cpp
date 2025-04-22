@@ -7,14 +7,14 @@
 #define ASIO_STANDALONE
 #include "crow.h"
 #include <chrono>
+#include <unordered_set>
 
 using namespace std;
 
-//TODO: Change this, this is just a placeholder
 struct CORSHandler {
     struct context {};
 
-    static void before_handle(const crow::request& req, crow::response& res, context&) {
+    void before_handle(crow::request& req, crow::response& res, context&) {
         res.add_header("Access-Control-Allow-Origin", "*");
         res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         res.add_header("Access-Control-Allow-Headers", "Content-Type");
@@ -24,7 +24,7 @@ struct CORSHandler {
         }
     }
 
-    static void after_handle(crow::request& req, crow::response& res, context&) {
+    void after_handle(crow::request& req, crow::response& res, context&) {
         res.add_header("Access-Control-Allow-Origin", "*");
     }
 };
@@ -100,6 +100,7 @@ void createBBallGraph(vector<BasketballPlayer>& bballers,unordered_map<string,in
 
 void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& indHolderFBall,Graph& fballGraph) {
     string line;
+    unordered_set<string> prevPlayers;
     //id holders which are important for reading data
     unordered_map<int,string> playerID;
     unordered_map<int,string> clubID;
@@ -132,10 +133,13 @@ void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& 
         while(getline(iss,value,',')) {
             tokens.push_back(value);
         }
-        playerID[stoi(tokens[0])] = tokens[3];
-        fballers.emplace_back(tokens[3],tokens[9],0,0,0,0);
-        indHolderFBall[tokens[3]] = int(fballers.size())-1;
-        natBucket[tokens[9]].push_back(fballers[fballers.size()-1]);
+        if(prevPlayers.find(tokens[3])==prevPlayers.end()) {
+            playerID[stoi(tokens[0])] = tokens[3];
+            fballers.emplace_back(tokens[3],tokens[9],0,0,0,0);
+            indHolderFBall[tokens[3]] = int(fballers.size())-1;
+            natBucket[tokens[9]].push_back(fballers[fballers.size()-1]);
+            prevPlayers.insert(tokens[3]);
+        }
     }
     //gathering data from each player's appearance in a game
     ifstream file3("appearances.csv");
@@ -169,7 +173,6 @@ void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& 
         yellowBucket[fballer.getYellowCards()].push_back(fballer);
         appearBucket[fballer.getAppearances()].push_back(fballer);
     }
-
     //add edges between soccer players using buckets to avoid having to do an O(|V|^2) brute force approach
     for(auto p: teamBucket) {
         if(p.first.second.empty()) {
@@ -192,7 +195,7 @@ void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& 
         }
     }
     for(auto p: assistBucket) {
-        if(p.first < 3) {
+        if(p.first < 5) {
             continue;
         }
         for(int i = 0; i < p.second.size(); i++) {
@@ -229,16 +232,6 @@ void createFBallGraph(vector<SoccerPlayer>& fballers,unordered_map<string,int>& 
             i--;
         }
     }
-    //get rid of duplicates in fballers
-    sort(fballers.begin(), fballers.end());
-    fballers.erase(unique(fballers.begin(), fballers.end()), fballers.end());
-    //make sure the graph is fully connected
-    vector<Player> nonConnected = fballGraph.checkConnectivity(fballers[0]);
-    for(int i = 0; i < nonConnected.size(); i++) {
-        fballGraph.getAdjList().erase(nonConnected[i]);
-        fballers[i] = fballers.back();
-        fballers.pop_back();
-    }
     //reconfigure the index table so we don't get any incorrect indices
     for(int i = 0; i < fballers.size(); i++) {
         indHolderFBall[fballers[i].getName()] = i;
@@ -271,7 +264,6 @@ int main(){
     CROW_ROUTE(app, "/bball_graph")
     .methods("GET"_method)([&bballGraph,&bballers]() {
         json j;
-        j["graph"] = bballGraph.toJson();
         j["players"] = bballers;
         return crow::response{j.dump()};
     });
@@ -279,7 +271,6 @@ int main(){
     CROW_ROUTE(app,"/fball_graph")
     .methods("GET"_method)([&fballGraph,&fballers]() {
         json j;
-        j["graph"] = fballGraph.toJson();
         j["players"] = fballers;
         return crow::response{j.dump()};
     });
@@ -299,11 +290,11 @@ int main(){
         auto start = chrono::high_resolution_clock::now();
         auto bfsPath = bballGraph.shortestPathBFS(src,dest);
         auto stop = chrono::high_resolution_clock::now();
-        auto bfsTime = duration_cast<chrono::seconds>(start - stop);
+        auto bfsTime = chrono::duration_cast<chrono::seconds>(start - stop);
         start = chrono::high_resolution_clock::now();
         auto dijkPath = bballGraph.shortestPathDijkstra(src,dest);
         stop = chrono::high_resolution_clock::now();
-        auto dijkTime = duration_cast<chrono::seconds>(stop - start);
+        auto dijkTime = chrono::duration_cast<chrono::seconds>(stop - start);
         vector<pair<BasketballPlayer,string>> trueBfsPath;
         for(int i = 0; i < bfsPath.size()-1; i++) {
             BasketballPlayer b = (bballers[indHolderBBall.at(bfsPath[i].first.getName())]);
@@ -389,11 +380,11 @@ int main(){
         auto start = chrono::high_resolution_clock::now();
         auto bfsPath = fballGraph.shortestPathBFS(src,dest);
         auto stop = chrono::high_resolution_clock::now();
-        auto bfsTime = duration_cast<chrono::seconds>(start - stop);
+        auto bfsTime = chrono::duration_cast<chrono::seconds>(start - stop);
         start = chrono::high_resolution_clock::now();
         auto dijkPath = fballGraph.shortestPathDijkstra(src,dest);
         stop = chrono::high_resolution_clock::now();
-        auto dijkTime = duration_cast<chrono::seconds>(stop - start);
+        auto dijkTime = chrono::duration_cast<chrono::seconds>(stop - start);
         vector<pair<SoccerPlayer,string>> trueBfsPath;
         for(int i = 0; i < bfsPath.size()-1; i++) {
             SoccerPlayer f = (fballers[indHolderFBall.at(bfsPath[i].first.getName())]);
@@ -424,7 +415,13 @@ int main(){
             }
             trueBfsPath.emplace_back(f,reason);
         }
-        trueBfsPath.emplace_back(fballers[indHolderFBall.at(bfsPath[bfsPath.size()-1].first.getName())],"");
+        if(!bfsPath.empty()){
+            trueBfsPath.emplace_back(fballers[indHolderFBall.at(bfsPath[bfsPath.size()-1].first.getName())],"");
+        }
+        else{
+            string reason = "There is no connection between " + src.getName() + " and " + dest.getName();
+            trueBfsPath.emplace_back(fballers[indHolderFBall[from]],reason);
+        }
         vector<pair<SoccerPlayer,string>> trueDijkPath;
         for(int i = 0; i < dijkPath.size()-1; i++) {
             SoccerPlayer f = (fballers[indHolderFBall.at(dijkPath[i].first.getName())]);
@@ -465,4 +462,27 @@ int main(){
     });
 
     app.port(18080).multithreaded().run();
+
+    //below is used for testing, comment it out for actual use
+    /*cout << "enter input" << endl;
+    string ball;
+    getline(cin,ball);
+    cout<<endl;
+    string player1;
+    getline(cin,player1);
+    cout<<endl;
+    string player2;
+    getline(cin,player2);
+    if(stoi(ball)) {
+        auto v = bballGraph.shortestPathBFS(bballers[indHolderBBall[player1]],bballers[indHolderBBall[player2]]);
+        for(auto p: v) {
+            cout << p.first.getName() << " " << p.second << endl;
+        }
+    }
+    else {
+        auto v = fballGraph.shortestPathBFS(fballers[indHolderFBall[player1]],fballers[indHolderFBall[player2]]);
+        for(auto p: v) {
+            cout << p.first.getName() << " " << p.second << endl;
+        }
+    }*/
 }
