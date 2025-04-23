@@ -22,8 +22,7 @@
   <li>Build the C++ backend</li>
 </ol>
 
-<pre><code>
-cd player-pathways-team157
+<pre><code>cd player-pathways-team157
 mkdir build && cd build
 cmake ..
 make
