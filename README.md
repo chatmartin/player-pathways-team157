@@ -23,15 +23,16 @@
 </ol>
 
 <pre><code>
+cd player-pathways-team157
 mkdir build && cd build
 cmake ..
-make ???
+make
 </code></pre>
 
 <ol start="3">
   <li>Run the backend server:</li>
 </ol>
-<pre><code>./TODO</code></pre>
+<pre><code>./main</code></pre>
 
 <ol start="4">
   <li>Navigate to the frontend folder and start React:</li>
