@@ -22,7 +22,6 @@
   <li>Build the C++ backend</li>
 </ol>
 
-<p>TODO)</p>
 <pre><code>
 mkdir build && cd build
 cmake ..
