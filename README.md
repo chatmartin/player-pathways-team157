@@ -36,8 +36,7 @@ make ???
 <ol start="4">
   <li>Navigate to the frontend folder and start React:</li>
 </ol>
-<pre><code>
-cd frontend
+<pre><code>cd frontend
 npm install
 npm install axios
 npm install @mui/material @emotion/react @emotion/styled
