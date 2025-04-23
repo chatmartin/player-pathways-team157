@@ -19,21 +19,20 @@
 <pre><code>git clone https://github.com/chatmartin/player-pathways-team157.git</code></pre>
 
 <ol start="2">
-  <li>TODO</li>
+  <li>Build the C++ backend</li>
 </ol>
 
 <p>TODO)</p>
 <pre><code>
-cd player-pathways-team157
 mkdir build && cd build
 cmake ..
-make
+make ???
 </code></pre>
 
 <ol start="3">
   <li>Run the backend server:</li>
 </ol>
-<pre><code>./main</code></pre>
+<pre><code>./TODO</code></pre>
 
 <ol start="4">
   <li>Navigate to the frontend folder and start React:</li>
