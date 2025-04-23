@@ -45,7 +45,7 @@ npm start
 
 <h2>Running the Backend</h2>
 
-<p>The C++ backend reads CSV files (or connects to PostgreSQL) and builds a graph of player-team relationships.</p>
+<p>The C++ backend reads CSV files and builds a graph of player-team relationships.</p>
 
 <p><strong>Endpoints:</strong></p>
 <ul>
